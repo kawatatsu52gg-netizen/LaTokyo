@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #F5F0E8;
+  --dark: #2C2418;
+  --gold: #B8965A;
+  --muted: #8B7D6B;
+  --light-line: #E2D9CC;
+  --card-bg: #FDFAF5;
+}
+
+body {
+  font-family: 'Noto Serif JP', serif;
+  background: var(--cream);
+  color: var(--dark);
+}
+
+.font-display {
+  font-family: 'Cormorant Garamond', serif;
+}
