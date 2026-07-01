@@ -3,6 +3,11 @@ main = "src/index.js"
 compatibility_date = "2025-06-01"
 workers_dev = true
 
+# 実行ログを Cloudflare に保存する（ダッシュボードの Workers > Logs で後から確認可能）。
+# `wrangler tail` がアイドルで切れても、ここに残るのでデバッグ・運用監視に有効。
+[observability]
+enabled = true
+
 # 秘密情報は wrangler.toml には一切書かない。すべて `wrangler secret put` で登録する。
 #   META_PIXEL_ID
 #   META_CAPI_TOKEN

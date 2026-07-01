@@ -89,6 +89,8 @@ async function processBooking(booking, env) {
   }
 
   // Square Customers API で連絡先を取得（Webhook 本体には連絡先が入っていない）
+  console.log(`processBooking start booking=${bookingId} customer=${customerId}`);
+
   const customer = await fetchSquareCustomer(customerId, env);
   if (!customer) {
     console.log(`booking ${bookingId}: customer ${customerId} not fetched, skip`);
@@ -113,6 +115,11 @@ async function processBooking(booking, env) {
   if (normalizedPhone) user_data.ph = [await sha256Hex(normalizedPhone)];
   if (givenName) user_data.fn = [await sha256Hex(givenName)];
   if (familyName) user_data.ln = [await sha256Hex(familyName)];
+
+  // PII は出さず、どのフィールドが揃ったかだけ記録（マッチ状況の確認用）
+  console.log(
+    `booking ${bookingId}: matched em=${!!email} ph=${!!normalizedPhone} fn=${!!givenName} ln=${!!familyName}`
+  );
 
   const eventTime = toUnixSeconds(booking.created_at);
 
