@@ -1,0 +1,25 @@
+# ローカル開発 (`wrangler dev`) 用のシークレット雛形。
+# このファイルをコピーして `.dev.vars` を作り、実際の値を入れる。
+#   cp .dev.vars.example .dev.vars
+# .dev.vars は .gitignore 済み。絶対にコミットしないこと。
+# 本番のシークレットは `wrangler secret put <NAME>` で別途登録する。
+
+# Meta Events Manager のデータセット(ピクセル)ID
+META_PIXEL_ID=
+
+# Meta Events Manager -> 設定 -> Conversions API で発行したアクセストークン
+META_CAPI_TOKEN=
+
+# Square Developer Dashboard のアクセストークン（顧客情報取得に使用）
+SQUARE_ACCESS_TOKEN=
+
+# Square Webhooks 設定の署名キー（署名検証に使用）
+SQUARE_WEBHOOK_SIGNATURE_KEY=
+
+# デプロイ後の Worker 公開 URL。署名検証で完全一致が必要。
+# 例: https://square-to-meta-capi-worker.<subdomain>.workers.dev
+SQUARE_NOTIFICATION_URL=
+
+# テスト時のみ設定。Meta Events Manager の「テストイベント」画面のコード。
+# 本番では空にする（この行を削除 / 未設定にする）。
+META_TEST_EVENT_CODE=

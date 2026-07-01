@@ -1,0 +1,15 @@
+{
+  "name": "square-to-meta-capi-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker that forwards Square booking.created events to the Meta Conversions API",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

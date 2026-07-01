@@ -1,0 +1,15 @@
+# secrets — 絶対にコミットしない
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# dependencies
+node_modules/
+
+# wrangler
+.wrangler/
+dist/
+
+# misc
+.DS_Store
+*.log

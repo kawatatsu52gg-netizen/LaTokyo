@@ -1,0 +1,14 @@
+name = "square-to-meta-capi-worker"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+workers_dev = true
+
+# 秘密情報は wrangler.toml には一切書かない。すべて `wrangler secret put` で登録する。
+#   META_PIXEL_ID
+#   META_CAPI_TOKEN
+#   SQUARE_ACCESS_TOKEN
+#   SQUARE_WEBHOOK_SIGNATURE_KEY
+#   SQUARE_NOTIFICATION_URL        (= デプロイ後の Worker 公開 URL)
+#   META_TEST_EVENT_CODE           (テスト時のみ。本番は削除)
+#
+# ローカル開発 (`wrangler dev`) では .dev.vars から読み込まれる（.dev.vars は gitignore 済み）。
