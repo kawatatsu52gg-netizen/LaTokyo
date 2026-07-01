@@ -15,5 +15,6 @@ enabled = true
 #   SQUARE_WEBHOOK_SIGNATURE_KEY
 #   SQUARE_NOTIFICATION_URL        (= デプロイ後の Worker 公開 URL)
 #   META_TEST_EVENT_CODE           (テスト時のみ。本番は削除)
+#   CONVERSION_SERVICE_VARIATION_IDS  (初回など新規獲得メニューの service_variation_id をカンマ区切り。未設定なら全件送信)
 #
 # ローカル開発 (`wrangler dev`) では .dev.vars から読み込まれる（.dev.vars は gitignore 済み）。

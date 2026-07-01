@@ -23,3 +23,10 @@ SQUARE_NOTIFICATION_URL=
 # テスト時のみ設定。Meta Events Manager の「テストイベント」画面のコード。
 # 本番では空にする（この行を削除 / 未設定にする）。
 META_TEST_EVENT_CODE=
+
+# コンバージョンとして送るサービス(メニュー)の service_variation_id をカンマ区切りで指定。
+# 「初回」など新規獲得メニューだけを Purchase として送るための絞り込み。
+# 回数券などリピート予約は除外される。未設定だと全予約を送る（警告ログあり）。
+# ID は Worker のログ `service_variation_ids=[...]` で確認できる。
+# 例: CONVERSION_SERVICE_VARIATION_IDS=XXXX,YYYY
+CONVERSION_SERVICE_VARIATION_IDS=

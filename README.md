@@ -221,10 +221,35 @@ npx wrangler secret delete <NAME>
 
 ---
 
+## 初回(新規獲得)メニューだけをコンバージョン計上する
+
+回数券などリピート客の予約まで Purchase として送ると、広告の新規獲得最適化が
+ズレる。これを防ぐため、**特定のサービス(メニュー)の予約だけ**を送信対象にできる。
+
+- 送信対象にしたいメニューの `service_variation_id` を
+  `CONVERSION_SERVICE_VARIATION_IDS`（カンマ区切り）に設定する。
+- 設定されていると、予約の `service_variation_id` が一致したときだけ CAPI 送信。
+  一致しない予約（回数券など）は `skip (repeat/other menu)` としてスキップ。
+- **未設定の場合は全予約を送信**し、`WARN CONVERSION_SERVICE_VARIATION_IDS not set`
+  を警告ログに出す。
+
+### 対象メニューの service_variation_id を調べる
+
+1. 対象メニュー（例: 初回体験）で予約を1件作成する
+2. Worker のログ（ダッシュボード Observability / `wrangler tail`）で
+   `booking ...: service_variation_ids=[...]` の行を見る
+3. その ID を設定に登録:
+   ```bash
+   npx wrangler secret put CONVERSION_SERVICE_VARIATION_IDS
+   # 値の例（複数はカンマ区切り）: ABCD1234,EFGH5678
+   npm run deploy
+   ```
+
 ## カスタマイズ
 
 - **イベント名**: `src/index.js` の `EVENT_NAME`（`"Purchase"` → `"Schedule"` 等）
 - **金額(value)**: `getValueForBooking(booking)` を編集してメニュー別単価に拡張
+- **初回メニュー絞り込み**: `CONVERSION_SERVICE_VARIATION_IDS`（上記）
 - **API バージョン**: `SQUARE_VERSION` / `META_GRAPH_VERSION`
 
 ---

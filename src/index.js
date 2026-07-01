@@ -83,6 +83,34 @@ async function processBooking(booking, env) {
   const bookingId = booking.id;
   const customerId = booking.customer_id;
 
+  // --- メニュー(サービス)による絞り込み ---
+  // 「初回」など新規獲得に該当するサービスの予約だけをコンバージョンとして送る。
+  // 回数券など既存客(リピート)の予約は除外する（広告最適化を新規獲得に合わせるため）。
+  // 対象サービスの service_variation_id を CONVERSION_SERVICE_VARIATION_IDS
+  // （カンマ区切り）で指定する。未設定のときは全件送信し、警告ログを出す。
+  const serviceVariationIds = extractServiceVariationIds(booking);
+  console.log(
+    `booking ${bookingId}: service_variation_ids=${JSON.stringify(serviceVariationIds)}`
+  );
+
+  const allowRaw = (env.CONVERSION_SERVICE_VARIATION_IDS || "").trim();
+  if (allowRaw) {
+    const allow = new Set(
+      allowRaw.split(",").map((s) => s.trim()).filter(Boolean)
+    );
+    const isConversion = serviceVariationIds.some((id) => allow.has(id));
+    if (!isConversion) {
+      console.log(
+        `booking ${bookingId}: not a conversion (first-time) service, skip (repeat/other menu)`
+      );
+      return;
+    }
+  } else {
+    console.log(
+      `booking ${bookingId}: WARN CONVERSION_SERVICE_VARIATION_IDS not set — sending ALL bookings (no first-time filter)`
+    );
+  }
+
   if (!customerId) {
     console.log(`booking ${bookingId}: no customer_id, skip (cannot match)`);
     return;
@@ -282,9 +310,22 @@ function toUnixSeconds(iso) {
 }
 
 /**
+ * 予約に紐づくサービス(メニュー)の service_variation_id をすべて取り出す。
+ * booking.appointment_segments[].service_variation_id を配列で返す。
+ */
+function extractServiceVariationIds(booking) {
+  const segments = Array.isArray(booking.appointment_segments)
+    ? booking.appointment_segments
+    : [];
+  return segments
+    .map((seg) => seg && seg.service_variation_id)
+    .filter(Boolean);
+}
+
+/**
  * 予約の金額（value）を返す。
  * 既定は 12000 JPY。今後メニュー/サービス別に分岐して拡張する。
- * 例: booking.appointment_segments[].service_variation_id で切り替える。
+ * 例: extractServiceVariationIds(booking) の ID で単価を切り替える。
  */
 function getValueForBooking(booking) {
   // TODO: メニュー別の単価に拡張する場合はここで booking の内容から算出する。
