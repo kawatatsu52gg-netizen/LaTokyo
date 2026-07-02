@@ -1,0 +1,7 @@
+# clasp のローカル設定（scriptId を含むためコミットしない）
+.clasp.json
+
+# 認証情報
+.clasprc.json
+
+node_modules/
