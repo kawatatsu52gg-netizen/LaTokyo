@@ -7,6 +7,17 @@ Google Apps Script (GAS) 製の統合ダッシュボードです。
 - 新しいダッシュボード用スプレッドシートに月別で集計を書き出します
 - 毎日1回、自動更新されます
 
+## デプロイ済みプロジェクト
+
+このプロジェクトは `kawatatsu52gg@gmail.com` の Apps Script に clasp でデプロイ済みです。
+
+- Script ID: `13tnT3y1qKCZAxYQd1lWDWhEvWtmomYI6kL2lusS8VxfY8NCss0vi3Et7`
+- エディタ: https://script.google.com/d/13tnT3y1qKCZAxYQd1lWDWhEvWtmomYI6kL2lusS8VxfY8NCss0vi3Et7/edit
+
+コードを更新したら `flourb-dashboard/` で `clasp push` すれば反映されます。
+（`.clasp.json` は Script ID を含むため Git 管理外。再構築時は `.clasp.json.example` を参照）
+
+
 ---
 
 ## 何ができるか
