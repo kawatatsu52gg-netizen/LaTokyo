@@ -1,0 +1,22 @@
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+
+# logs
+*.log
+npm-debug.log*
+
+# os
+.DS_Store
+
+# prisma
+prisma/*.db
+prisma/migrations/dev.db*

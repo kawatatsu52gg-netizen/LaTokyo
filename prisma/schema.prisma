@@ -1,0 +1,221 @@
+// LaTokyo 予約同期システム データベース設計
+// タイムゾーン: DBはUTC保存、表示時にAsia/Tokyoへ変換
+// 個人情報は最小限。トークン・顧客情報はログに平文で残さない。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---- 列挙 ----
+
+enum Provider {
+  square
+  salonboard // HOT PEPPER Beauty / SALON BOARD
+}
+
+/// 予約の発生元。自システムが作った枠を再同期しないための source 管理に使う。
+enum ReservationSource {
+  square
+  salonboard
+  system_block // 本システムが他方の予約を受けて自動作成したブロック枠
+}
+
+enum ReservationStatus {
+  pending
+  confirmed
+  changed
+  cancelled
+  no_show
+}
+
+/// 同期ステータス（要件どおり）
+enum SyncStatus {
+  pending
+  synced
+  failed
+  conflict
+  manual_action_required
+  cancelled
+}
+
+enum JobStatus {
+  queued
+  processing
+  done
+  failed
+  dead // 最大再試行超過 → 管理者通知済み
+}
+
+enum LogStatus {
+  success
+  failure
+  skipped
+}
+
+// ---- integrations: 連携先の資格情報（トークンは暗号化保存） ----
+
+model Integration {
+  id                   String    @id @default(cuid())
+  provider             Provider
+  locationId           String?
+  encryptedAccessToken String? // AES-256-GCM で暗号化した文字列（平文禁止）
+  refreshToken         String? // 同上（暗号化して保存）
+  tokenExpiresAt       DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([provider, locationId])
+  @@map("integrations")
+}
+
+// ---- reservations: 予約本体 ----
+
+model Reservation {
+  id                     String            @id @default(cuid())
+  source                 ReservationSource
+  sourceReservationId    String? // 発生元での予約ID（外部/自ブロック）
+  squareBookingId        String? // Square側のBooking ID
+  salonBoardReservationId String? // SALON BOARD側の予約識別子（メールから抽出できた場合）
+
+  // 個人情報は最小限
+  customerName  String?
+  customerPhone String?
+  customerEmail String?
+
+  staffId   String? // 内部スタッフID（StaffMapping 経由で解決）
+  serviceId String? // 内部サービスID（ServiceMapping 経由で解決）
+
+  startAt DateTime // UTC保存
+  endAt   DateTime // UTC保存（施術時間＋前後準備を反映）
+
+  status       ReservationStatus @default(pending)
+  syncStatus   SyncStatus        @default(pending)
+  lastSyncedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mappings ReservationMapping[]
+  logs     SyncLog[]
+  jobs     SyncJob[]
+
+  // --- 重複登録防止 ---
+  @@unique([squareBookingId], name: "uniq_square_booking")
+  @@unique([source, sourceReservationId], name: "uniq_source_reservation")
+  // 同一スタッフ・同一開始・同一終了の重複確認用インデックス（アクティブ枠の突合に使用）
+  @@index([staffId, startAt, endAt])
+  @@index([startAt, endAt])
+  @@index([syncStatus])
+  @@map("reservations")
+}
+
+// ---- reservation_mappings: Square と 外部 の対応付け ----
+
+model ReservationMapping {
+  id               String   @id @default(cuid())
+  squareBookingId  String
+  externalBookingId String
+  externalProvider Provider
+  reservationId    String?
+  reservation      Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([squareBookingId, externalProvider], name: "uniq_square_provider")
+  @@unique([externalBookingId, externalProvider], name: "uniq_external_provider")
+  @@map("reservation_mappings")
+}
+
+// ---- webhook_events: Webhook/メール の重複排除（冪等処理） ----
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  provider    Provider
+  eventId     String // Squareのevent_id、またはメールのMessage-ID
+  eventType   String
+  receivedAt  DateTime @default(now())
+  processedAt DateTime?
+
+  @@unique([provider, eventId], name: "uniq_provider_event")
+  @@map("webhook_events")
+}
+
+// ---- sync_jobs: ジョブキュー（指数バックオフ再試行） ----
+
+model SyncJob {
+  id            String    @id @default(cuid())
+  eventType     String
+  provider      Provider
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  idempotencyKey String   @unique // 再送を考慮した冪等キー
+  payload       Json // マスキング済み（トークン/個人情報は伏字）
+  status        JobStatus @default(queued)
+  retryCount    Int       @default(0)
+  runAfter      DateTime  @default(now()) // バックオフ用の次回実行時刻
+  lastError     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status, runAfter])
+  @@map("sync_jobs")
+}
+
+// ---- sync_logs: 同期ログ（平文機密を残さない） ----
+
+model SyncLog {
+  id              String    @id @default(cuid())
+  eventType       String
+  provider        Provider
+  reservationId   String?
+  reservation     Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  requestPayload  Json? // redact 済み
+  responsePayload Json? // redact 済み
+  status          LogStatus
+  errorMessage    String?
+  retryCount      Int       @default(0)
+  createdAt       DateTime  @default(now())
+
+  @@index([provider, createdAt])
+  @@index([status])
+  @@map("sync_logs")
+}
+
+// ---- ServiceMapping: サービス時間のマッピング（管理画面で編集） ----
+
+model ServiceMapping {
+  id                 String   @id @default(cuid())
+  // HPB/SALON BOARDのメニュー表記（メール解析でマッチ）
+  externalServiceName String?
+  // Square Catalog のサービス（variation）ID
+  squareServiceId    String?
+  displayName        String
+  durationMinutes    Int // 施術時間（60, 90 など）
+  prepMinutesBefore  Int      @default(0)
+  prepMinutesAfter   Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([externalServiceName])
+  @@map("service_mappings")
+}
+
+// ---- StaffMapping: スタッフのマッピング（管理画面で編集） ----
+
+model StaffMapping {
+  id                String   @id @default(cuid())
+  externalStaffName String? // HPB/SALON BOARD上のスタッフ表記
+  squareTeamMemberId String? // Square team member ID
+  displayName       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([externalStaffName])
+  @@unique([squareTeamMemberId])
+  @@map("staff_mappings")
+}
