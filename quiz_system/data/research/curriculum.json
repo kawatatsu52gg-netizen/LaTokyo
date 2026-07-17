@@ -1,0 +1,60 @@
+{
+  "description": "Knowledge Base の目標設計図（ideal）。Curriculum Planner が実KBと比較し、不足テーマ/Evidence/Quiz と完成度を算出する。",
+  "weights": {"entities": 0.35, "evidence": 0.30, "quizzes": 0.20, "content": 0.15},
+  "targets": [
+    {
+      "topic_id": "TOP-external", "name": "外性器",
+      "target_entities": ["恥丘", "陰核", "大陰唇", "小陰唇", "腟前庭", "尿道", "スキーン腺", "バルトリン腺", "処女膜"],
+      "target_evidence_claims": 8, "target_quizzes": 5,
+      "target_formats": ["quiz", "instagram_carousel", "halii_slide", "youtube_script", "patient"]
+    },
+    {
+      "topic_id": "TOP-internal", "name": "内性器",
+      "target_entities": ["膣", "子宮", "卵巣", "卵管", "子宮頸部"],
+      "target_evidence_claims": 6, "target_quizzes": 4,
+      "target_formats": ["quiz", "instagram_carousel", "halii_slide", "patient"]
+    },
+    {
+      "topic_id": "TOP-innervation", "name": "神経支配",
+      "target_entities": ["陰部神経", "陰核背神経", "骨盤内臓神経", "下腹神経", "迷走神経", "S2〜S4", "副交感神経", "交感神経"],
+      "target_evidence_claims": 8, "target_quizzes": 6,
+      "target_formats": ["quiz", "instagram_carousel", "halii_slide", "youtube_script"]
+    },
+    {
+      "topic_id": "TOP-receptor", "name": "感覚受容",
+      "target_entities": ["Meissner小体", "Pacinian小体", "Merkel細胞", "Ruffini終末", "自由神経終末"],
+      "target_evidence_claims": 5, "target_quizzes": 4,
+      "target_formats": ["quiz", "instagram_carousel", "halii_slide"]
+    },
+    {
+      "topic_id": "TOP-pelvicfloor", "name": "骨盤底",
+      "target_entities": ["骨盤底筋", "肛門挙筋", "球海綿体筋", "恥骨直腸筋", "尾骨筋"],
+      "target_evidence_claims": 6, "target_quizzes": 4,
+      "target_formats": ["quiz", "halii_slide", "practitioner", "patient"]
+    },
+    {
+      "topic_id": "TOP-response", "name": "性反応",
+      "target_entities": ["エストロゲン", "プロゲステロン", "テストステロン", "オキシトシン", "ドーパミン"],
+      "target_evidence_claims": 6, "target_quizzes": 4,
+      "target_formats": ["quiz", "instagram_carousel", "youtube_script", "patient"]
+    },
+    {
+      "topic_id": "TOP-hormone", "name": "ホルモン",
+      "target_entities": ["エストロゲン", "プロゲステロン", "テストステロン", "FSH", "LH", "オキシトシン"],
+      "target_evidence_claims": 6, "target_quizzes": 4,
+      "target_formats": ["quiz", "patient", "halii_slide"]
+    },
+    {
+      "topic_id": "TOP-autonomic", "name": "自律神経",
+      "target_entities": ["交感神経", "副交感神経", "骨盤内臓神経", "下腹神経"],
+      "target_evidence_claims": 5, "target_quizzes": 3,
+      "target_formats": ["quiz", "youtube_script"]
+    },
+    {
+      "topic_id": "TOP-menopause", "name": "更年期",
+      "target_entities": ["更年期", "エストロゲン低下", "閉経関連泌尿生殖器症候群", "ホットフラッシュ", "骨盤底筋"],
+      "target_evidence_claims": 6, "target_quizzes": 4,
+      "target_formats": ["quiz", "patient", "instagram_carousel", "halii_slide"]
+    }
+  ]
+}

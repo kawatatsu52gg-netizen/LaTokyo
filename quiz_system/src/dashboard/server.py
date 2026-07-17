@@ -61,6 +61,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(actions.review_items(q.get("kind", ["quiz"])[0]))
             if u.path == "/api/content":
                 return self._send({"content": actions.get_content(q.get("path", [""])[0])})
+            if u.path == "/api/research":
+                from ..research import team
+                return self._send(team.run_daily())
             return self._send({"error": "not found"}, 404)
         except Exception as e:
             return self._send({"error": str(e)}, 500)
@@ -77,6 +80,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(actions.reject_quiz(b.get("id", "")))
             if u.path == "/api/edit":
                 return self._send(actions.edit_quiz(b.get("id", ""), b.get("updates", {})))
+            if u.path == "/api/design":
+                from ..research.designer import design
+                logs = []
+                r = design(b.get("subject", ""), log=lambda m: logs.append(m))
+                r["log"] = logs
+                return self._send(r)
             return self._send({"error": "not found"}, 404)
         except Exception as e:
             return self._send({"error": str(e)}, 500)

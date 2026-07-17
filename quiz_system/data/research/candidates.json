@@ -1,0 +1,33 @@
+[
+  {
+    "candidate_id": "CAND-0001",
+    "statement": "陰核背神経は陰部神経の終枝である。",
+    "topic_id": "TOP-innervation",
+    "proposed_sources": [{"type": "textbook", "ref": "Gray's Anatomy", "reliability": "A"}],
+    "note": "既存の可能性あり（重複チェック対象）"
+  },
+  {
+    "candidate_id": "CAND-0002",
+    "statement": "閉経後はエストロゲン低下により腟上皮が菲薄化し、乾燥・性交痛(GSM)を来しうる。",
+    "topic_id": "TOP-menopause",
+    "proposed_sources": [
+      {"type": "paper", "ref": "GSM review 2020", "reliability": "B"},
+      {"type": "textbook", "ref": "Williams Gynecology", "reliability": "A"}
+    ],
+    "note": "新規テーマ(更年期)候補"
+  },
+  {
+    "candidate_id": "CAND-0003",
+    "statement": "テストステロンは女性でも性欲(desire)に関与するとされるが、補充の適応は限定的で議論がある。",
+    "topic_id": "TOP-hormone",
+    "proposed_sources": [{"type": "paper", "ref": "androgen female desire review", "reliability": "C"}],
+    "note": "議論あり(エビデンスC見込み)"
+  },
+  {
+    "candidate_id": "CAND-0004",
+    "statement": "卵管は卵子の輸送と受精の場であり、采部・膨大部・峡部・間質部に分けられる。",
+    "topic_id": "TOP-internal",
+    "proposed_sources": [{"type": "textbook", "ref": "Gray's Anatomy", "reliability": "A"}],
+    "note": "内性器の不足補完候補"
+  }
+]

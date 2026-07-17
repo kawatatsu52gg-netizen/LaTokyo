@@ -8,7 +8,13 @@ YouTube → NotebookLM で整理した情報を**根拠(出典)として**、成
 >
 > **一般ユーザーはブラウザのDashboardだけで操作できます**：
 > `python -m src.pipeline dashboard` → http://127.0.0.1:8765/ （設計は [docs/DASHBOARD.md](docs/DASHBOARD.md)）。
-> Dashboard/ワンクリック追加/Topic Manager/Review Center/Search/Daily Report の6画面。
+> Dashboard/ワンクリック追加/Topic Manager/Review Center/Search/**Research Team**/Daily Report の7画面。
+>
+> **Research Team**（KBに何を足すべきか考える）：`python -m src.pipeline research` または
+> Dashboardの「Research Team」タブ。KB完成度(0〜100%)・Knowledge Gap・Evidence Coverage・
+> Learning Progress・探索キュー(YouTube/PubMed/Scholar/教科書のクエリ)を提示。
+> Learning Designer は `python -m src.pipeline research-design "<主題>"` でコンテンツ一式を生成。
+> ※ Research Teamは提案のみ。KBへの追加は人が NotebookLM→検証→KB の流れで行います（SSoT）。
 
 ## クイックスタート（Dashboardを起動）
 

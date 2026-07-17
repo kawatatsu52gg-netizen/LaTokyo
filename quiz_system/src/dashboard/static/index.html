@@ -61,6 +61,7 @@
   <button data-tab="topics">Topic Manager</button>
   <button data-tab="review">Review Center</button>
   <button data-tab="search">Search</button>
+  <button data-tab="research">Research Team</button>
   <button data-tab="daily">Daily Report</button>
 </nav>
 <main id="view"><p class="muted">読み込み中…</p></main>
@@ -89,7 +90,72 @@ async function render(){
   if(TAB==='topics') return renderTopics();
   if(TAB==='review') return renderReview();
   if(TAB==='search') return renderSearch();
+  if(TAB==='research') return renderResearch();
   if(TAB==='daily') return renderDaily();
+}
+
+function gauge(pct){
+  const col = pct>=75?'var(--ok)':pct>=50?'var(--warn)':'var(--bad)';
+  return `<div style="display:flex;align-items:center;gap:14px">
+    <div style="flex:1;height:14px;background:#0d1322;border:1px solid var(--line);border-radius:20px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${col}"></div></div>
+    <b style="font-size:20px">${pct}%</b></div>`;
+}
+
+async function renderResearch(){
+  view.innerHTML='<p class="muted">Research Team 分析中…</p>';
+  const r = await api.get('/api/research');
+  const g = r.gaps||{};
+  const ec = r.evidence_coverage||{};
+  const lp = r.learning_progress||{};
+  view.innerHTML = `
+    <h2>Knowledge Base 完成度</h2>
+    ${gauge(r.completeness||0)}
+    <div class="grid" style="margin-top:14px">
+      ${card('Evidence A/B 割合', (ec.ab_ratio||0)+'%', true)}
+      ${card('Learning Progress', (lp.overall_pct||0)+'%', true)}
+      ${card('未登録テーマ', (g.missing_topics||[]).length)}
+      ${card('Evidence不足テーマ', (g.weak_evidence||[]).length)}
+    </div>
+
+    <h2>🧭 Knowledge Gap（Curriculum Planner）</h2>
+    <div class="qcard">
+      <p><b>未登録テーマ:</b> ${(g.missing_topics||[]).map(esc).join('、')||'なし'}</p>
+      <p><b>Evidence不足:</b> ${(g.weak_evidence||[]).map(x=>esc(x.name)+`(${x.have}/${x.want})`).join('、')||'なし'}</p>
+      <p><b>Quiz不足:</b> ${(g.quiz_gaps||[]).map(x=>esc(x.name)+`(${x.have}/${x.want})`).join('、')||'なし'}</p>
+      <p><b>不足概念:</b> ${(g.entity_gaps||[]).map(x=>esc(x.name)+':'+x.missing.map(esc).join('/')).join('　')||'なし'}</p>
+    </div>
+
+    <h2>📊 Evidence Coverage</h2>
+    <div class="qcard">検証済み分布: ${Object.entries(ec.overall||{}).map(([k,v])=>`<span class="pill ${k}">${k}:${v}</span>`).join(' ')||'なし'}
+      ／ 検証済み総数 ${ec.verified_total||0}</div>
+
+    <h2>📈 Learning Progress（テーマ別Quiz達成）</h2>
+    <table><thead><tr><th>テーマ</th><th>Quiz</th><th>達成</th></tr></thead><tbody>
+      ${(lp.topics||[]).map(t=>`<tr><td>${esc(t.name)}</td><td>${t.have}/${t.want}</td><td>${t.pct}%</td></tr>`).join('')}
+    </tbody></table>
+
+    <h2>🔭 Research Scout キュー（探すべき対象・情報源別クエリ）</h2>
+    ${(r.scout_queue||[]).map(q=>`<div class="qcard">
+      <div class="row"><span class="pill">${esc(q.priority)}</span> <b>${esc(q.subject)}</b>
+        <span class="muted">${esc(q.reason)}</span>
+        <button class="btn ghost dz" data-s="${esc(q.subject)}">この主題を生成(Designer)</button></div>
+      <div class="muted">YouTube: ${esc(q.sources.youtube)}<br>PubMed: ${esc(q.sources.pubmed)}<br>
+        Scholar: ${esc(q.sources.scholar)}<br>教科書: ${esc(q.sources.textbook)}</div></div>`).join('')}
+
+    <h2>🧪 候補claim（Evidence仮判定＋重複チェック）</h2>
+    ${(r.candidates||[]).map(c=>`<div class="choice ${c.status==='new'?'':''}">
+      <span class="pill ${c.tentative_evidence}">${c.tentative_evidence}</span>
+      <span class="pill">${c.status==='new'?'新規':'重複'}</span> ${esc(c.statement)}
+      <span class="muted">要人手検証</span></div>`).join('')}
+    <p class="muted">※ Research Team は「何を足すべきか」を提案します。追加は人が NotebookLM→検証→KB の流れで行います（SSoT）。</p>
+    <div id="dzlog" class="log" style="display:none;margin-top:10px"></div>`;
+  document.querySelectorAll('.dz').forEach(b=>b.onclick=async()=>{
+    const box=document.getElementById('dzlog'); box.style.display='block';
+    box.textContent='生成中… '+b.dataset.s;
+    const r=await api.post('/api/design',{subject:b.dataset.s});
+    box.textContent=(r.log||[]).join('\n')+`\n→ ${r.count} 形式を生成しました。`;
+  });
 }
 
 async function renderDashboard(){

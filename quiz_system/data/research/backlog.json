@@ -1,0 +1,33 @@
+{
+  "description": "Research Scout の探索バックログ。各テーマについて、どの情報源で何を探すかの起点クエリ。実際の取得は人が行い、結果は NotebookLM 経由でKBへ（SSoT）。",
+  "queries": [
+    {
+      "subject": "更年期", "topic_id": "TOP-menopause",
+      "youtube": "menopause female sexual function anatomy 更年期 性機能",
+      "pubmed": "menopause AND (dyspareunia OR genitourinary syndrome) AND female sexual function",
+      "scholar": "genitourinary syndrome of menopause vaginal atrophy review",
+      "textbook": "Gray's Anatomy / Williams Gynecology: menopause, GSM の章"
+    },
+    {
+      "subject": "ホルモン", "topic_id": "TOP-hormone",
+      "youtube": "estrogen progesterone testosterone female sexual response 解説",
+      "pubmed": "sex steroids AND female sexual function AND (estrogen OR testosterone)",
+      "scholar": "androgens and female sexual desire systematic review",
+      "textbook": "Endocrinology テキスト: 性ステロイドと性機能"
+    },
+    {
+      "subject": "卵管", "topic_id": "TOP-internal",
+      "youtube": "fallopian tube anatomy 卵管 解剖",
+      "pubmed": "fallopian tube anatomy physiology review",
+      "scholar": "oviduct structure function review",
+      "textbook": "Gray's Anatomy: 卵管の章"
+    },
+    {
+      "subject": "処女膜", "topic_id": "TOP-external",
+      "youtube": "hymen vaginal corona myths anatomy 医学",
+      "pubmed": "hymen anatomy myths virginity examination",
+      "scholar": "hymen morphology review vaginal corona",
+      "textbook": "解剖学テキスト: 外陰部・処女膜"
+    }
+  ]
+}

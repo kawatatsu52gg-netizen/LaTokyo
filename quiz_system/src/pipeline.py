@@ -381,6 +381,31 @@ def cmd_content_all(subject: str) -> None:
     log(f"content-all 完了: {len(outs)}形式を生成（主題『{subject}』）")
 
 
+def cmd_research() -> None:
+    """Research Team の日次分析（完成度/ギャップ/Evidence Coverage/研究キュー）を出力。"""
+    from .research import team
+    r = team.run_daily()
+    log(f"=== Research Team ===  KB完成度: {r['completeness']}%")
+    g = r["gaps"]
+    weak = [f"{x['name']}({x['have']}/{x['want']})" for x in g["weak_evidence"]]
+    qgap = [f"{x['name']}({x['have']}/{x['want']})" for x in g["quiz_gaps"]]
+    log(f"未登録テーマ: {g['missing_topics'] or 'なし'}")
+    log(f"Evidence不足: {weak or 'なし'}")
+    log(f"Quiz不足: {qgap or 'なし'}")
+    log(f"Evidence A/B割合: {r['evidence_coverage'].get('ab_ratio', 0)}%")
+    log("Research Scout キュー:")
+    for q in r["scout_queue"]:
+        log(f"  [{q['priority']}] {q['subject']} — {q['reason']}")
+    log(f"  詳細レポート: data/research/daily_research.md")
+
+
+def cmd_research_design(subject: str) -> None:
+    """Learning Designer: あるテーマの学習コンテンツ一式を生成。"""
+    from .research.designer import design
+    r = design(subject, log=log)
+    log(f"research-design 完了: {subject} → {r['count']}形式")
+
+
 def cmd_content_list() -> None:
     from .content.generator import load_templates, list_formats
     specs = load_templates()
@@ -531,6 +556,7 @@ COMMANDS = {
     "kb-build": cmd_kb_build,
     "kb-stats": cmd_kb_stats,
     "content-list": cmd_content_list,
+    "research": cmd_research,
     "status": cmd_status,
     "run-all": cmd_run_all,
 }
@@ -567,6 +593,10 @@ def main(argv: list[str]) -> int:
     if cmd == "dashboard":
         from .dashboard.server import serve
         serve(int(argv[1]) if len(argv) > 1 else 8765); return 0
+    if cmd == "research-design":
+        if len(argv) < 2:
+            print('usage: research-design "<subject>"'); return 1
+        cmd_research_design(argv[1]); return 0
     fn = COMMANDS.get(cmd)
     if not fn:
         print(f"unknown command: {cmd}\n"); print(__doc__); return 1
