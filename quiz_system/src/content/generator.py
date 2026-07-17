@@ -79,6 +79,16 @@ def generate_content(kb_path: Path, fmt: str, subject: str, log=print) -> Path |
             out.write_text(md, encoding="utf-8")
             log(f"生成: {spec.get('label', spec['format'])} → {out}")
             return out
+        elif spec["archetype"] == "empathy":
+            from .empathy import build_module, render_markdown
+            kb.close()
+            md = render_markdown(build_module(subject))
+            subdir = OUT_DIR / _safe_dir(subject)
+            subdir.mkdir(parents=True, exist_ok=True)
+            out = subdir / f"{spec['format']}.md"
+            out.write_text(md, encoding="utf-8")
+            log(f"生成: {spec.get('label', spec['format'])} → {out}")
+            return out
         else:
             b = build_bundle(kb, subject, min_evidence=spec.get("min_evidence", "B"))
             if not b.facts:

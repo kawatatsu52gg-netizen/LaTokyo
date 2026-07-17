@@ -16,6 +16,21 @@ YouTube → NotebookLM で整理した情報を**根拠(出典)として**、成
 > Learning Designer は `python -m src.pipeline research-design "<主題>"` でコンテンツ一式を生成。
 > ※ Research Teamは提案のみ。KBへの追加は人が NotebookLM→検証→KB の流れで行います（SSoT）。
 
+## 相手を理解する（感情）モジュール
+
+知識だけでなく「相手を理解できる人になる」ための感情モジュールを生成します。
+身体の知識は KB（SSoT・自動平易化）から、感情・会話パートは尊重/同意/対話を軸にした
+共感ライブラリ（`data/empathy/empathy.json`）から組み立て、次の7ステップを出力します：
+
+1. 身体の知識（やさしく）→ 2. なぜ大切か → 3. パートナーの気持ち → 4. コミュニケーション例
+→ 5. よくある失敗 → 6. より良い会話例 → 7. 学び
+
+```bash
+python -m src.pipeline generate empathy "陰核"     # → data/content/陰核/empathy.md
+python -m src.pipeline generate empathy "性交痛"    # 主題に応じて感情カテゴリを自動選択
+```
+テクニック指南ではなく、「決まった正解より、目の前の相手に聞く」姿勢を育てる内容です。
+
 ## 初心者向け学習ゲーム（解剖学を知らない一般男性向け）
 
 KBは専門レベルのまま保持し、初心者向けには **自動でやさしい言葉に変換** します。
