@@ -1,0 +1,1 @@
+{"format":"email_course","label":"メール講座","aliases":["email","メール","mail"],"archetype":"email_course","audience":"一般","tone":"親しみやすい","min_evidence":"B","config":{"days":5},"safety":true}

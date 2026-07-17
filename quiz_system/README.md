@@ -122,9 +122,30 @@ python -m src.pipeline kb-generate A TOP-innervation   # テーマ限定生成�
 Topic / Sub Topic（topics階層）、Anatomy / Nerve / Receptor / Muscle / Hormone / Clinical（entities.etype）、
 Evidence（claims/edges の evidence_level）、Source（youtube/paper/textbook）。
 
+## Content Generator（医学コンテンツ生成エンジン）
+Knowledge Base を **唯一の情報源(SSoT)** として、同じ知識から14形式を生成します。
+生成器は KB(kb.db) のみを参照し、NotebookLM/YouTube/生ファイルは見ません。
+設計・テンプレ構成・設計図・CLI一覧・100ジャンル保守は [docs/CONTENT_GENERATOR.md](docs/CONTENT_GENERATOR.md)。
+
+```bash
+python -m src.pipeline content-list                 # 生成可能な14形式と別名
+python -m src.pipeline generate instagram "陰部神経"  # 1形式を生成
+python -m src.pipeline generate slide "骨盤底筋"
+python -m src.pipeline generate youtube "陰核"
+python -m src.pipeline generate patient "性交痛"
+python -m src.pipeline generate quiz "女性器"
+python -m src.pipeline content-all "陰核"            # 全14形式を一括生成
+```
+生成物は `data/content/<主題>/<形式>.md`（出典・エビデンス・安全注記つき）。
+14形式: 4択クイズ / Instagramカルーセル / Instagramリール / Threads / X / YouTube台本 /
+YouTubeショート / 患者向け資料 / 整体師向け資料 / HALII Academyスライド / ブログ / メール講座 / FAQ / AIチャットボット回答。
+
+**KB更新→全コンテンツ最新化**: `kb-build` でKBを更新し、`content-all "<主題>"` で作り直せば全形式が最新のKB状態から再生成されます（生成はKBの純粋な関数）。
+**新形式の追加**: `templates/content/<name>.json` を1枚置くだけ（既存アーキタイプ利用ならコード変更不要）。
+
 ## テスト
 ```bash
-python -m unittest -v tests.test_pipeline tests.test_kb
+python -m unittest -v tests.test_pipeline tests.test_kb tests.test_content
 ```
 
 ## ディレクトリ

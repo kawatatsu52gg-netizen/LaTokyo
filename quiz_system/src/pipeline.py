@@ -363,6 +363,28 @@ def cmd_kb_generate(min_evidence: str = "A", topic_id: str = "") -> None:
     log(f"  → {outdir}/ に保存（draft・未承認）")
 
 
+def cmd_generate(fmt: str, subject: str) -> None:
+    """generate <format> <subject>: KBから1形式のコンテンツを生成。"""
+    from .content.generator import generate_content
+    generate_content(ROOT / "data" / "database" / "kb.db", fmt, subject, log=log)
+
+
+def cmd_content_all(subject: str) -> None:
+    """content-all <subject>: KBから全形式のコンテンツを生成（KB更新後の一括再生成に）。"""
+    from .content.generator import generate_all
+    outs = generate_all(ROOT / "data" / "database" / "kb.db", subject, log=log)
+    log(f"content-all 完了: {len(outs)}形式を生成（主題『{subject}』）")
+
+
+def cmd_content_list() -> None:
+    from .content.generator import load_templates, list_formats
+    specs = load_templates()
+    log("=== 生成可能な形式（テンプレート） ===")
+    for fmt, label, aliases in list_formats(specs):
+        log(f"  {fmt:20s} {label:16s} 別名: {', '.join(aliases)}")
+    log("使い方: python -m src.pipeline generate <format|別名> \"<主題>\"")
+
+
 def cmd_review(source_filter: str = "") -> None:
     """
     生成済みクイズを10観点(各10点/合計100点)で再評価し、
@@ -503,6 +525,7 @@ COMMANDS = {
     "review": cmd_review,
     "kb-build": cmd_kb_build,
     "kb-stats": cmd_kb_stats,
+    "content-list": cmd_content_list,
     "status": cmd_status,
     "run-all": cmd_run_all,
 }
@@ -527,6 +550,15 @@ def main(argv: list[str]) -> int:
         ev = argv[1] if len(argv) > 1 else "A"
         topic = argv[2] if len(argv) > 2 else ""
         cmd_kb_generate(ev, topic); return 0
+    if cmd == "generate":
+        if len(argv) < 3:
+            print('usage: generate <format> "<subject>"  （例: generate instagram "陰部神経"）')
+            return 1
+        cmd_generate(argv[1], argv[2]); return 0
+    if cmd == "content-all":
+        if len(argv) < 2:
+            print('usage: content-all "<subject>"'); return 1
+        cmd_content_all(argv[1]); return 0
     fn = COMMANDS.get(cmd)
     if not fn:
         print(f"unknown command: {cmd}\n"); print(__doc__); return 1

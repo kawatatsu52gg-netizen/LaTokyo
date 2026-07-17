@@ -1,0 +1,1 @@
+{"format":"x","label":"X投稿","aliases":["x","twitter","ツイート"],"archetype":"social_post","audience":"一般","tone":"簡潔","min_evidence":"B","config":{"max_chars":140,"max_posts":5},"safety":true}
