@@ -1,0 +1,13 @@
+# 認証情報・生成物・DBはコミットしない
+.env
+data/database/*.db
+data/database/*.db-journal
+__pycache__/
+*.pyc
+# 生成された成果物（サンプルは別途 tests/fixtures に置く）
+data/sources/raw/*
+data/sources/normalized/*
+!data/sources/raw/.gitkeep
+!data/sources/normalized/.gitkeep
+
+data/reports/pipeline.log

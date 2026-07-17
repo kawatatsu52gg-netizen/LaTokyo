@@ -1,0 +1,32 @@
+{
+  "quiz_id": "Q-0008",
+  "chapter": 4,
+  "level": 2,
+  "question": "高周波の振動や急な圧変化に反応し、皮膚の深部に存在する感覚受容器はどれですか。",
+  "choices": {
+    "A": "Merkel細胞(メルケル細胞)である",
+    "B": "Ruffini終末(ルフィニ終末)である",
+    "C": "Pacinian小体(パチニ小体)である",
+    "D": "Meissner小体(マイスネル小体)である"
+  },
+  "correct_answer": "C",
+  "explanation": "Pacinian小体は高周波の振動や急な圧変化に反応する速順応性の受容器で、真皮深層〜皮下の深い層に存在します。受容器ごとに得意な刺激(接触・圧・振動・伸張)が異なります。",
+  "choice_explanations": {
+    "A": "Merkel細胞は持続圧やエッジ・形の識別に働き、表皮基底にあります。",
+    "B": "Ruffini終末は皮膚の伸張・持続に反応します。",
+    "C": "正しい。Pacinian小体は高周波振動・急な圧変化に反応する深部受容器です。",
+    "D": "Meissner小体は軽い接触や低周波振動に反応し、浅い層にあります。"
+  },
+  "practical_point": "「振動」「軽い接触」「圧」など刺激を区別して考える視点が持てます。",
+  "individual_variation_note": "受容器の分布や感受性には個人差があり、心地よい刺激は人により異なります。",
+  "consent_note": "",
+  "source_ids": [
+    "SRC-0001"
+  ],
+  "claim_ids": [
+    "CLM-1010"
+  ],
+  "evidence_level": "A",
+  "needs_verification": "",
+  "review_status": "reviewed"
+}

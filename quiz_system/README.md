@@ -1,0 +1,129 @@
+# 女性の身体・医学教育クイズ生成システム（MVP）
+
+YouTube → NotebookLM で整理した情報を**根拠(出典)として**、成人男性向けに
+女性の身体を医学的に正しく学ぶ4択クイズを、検証つきで生成する半自動システムです。
+
+> 目的は性的テクニックの一方的な指導ではなく、**女性の身体には大きな個人差がある**ことの理解と、
+> パートナーとの**対話・同意・安心感・相互理解**を通じた満足度向上のための**教育**です。
+> 制作の絶対ルールは [CLAUDE.md](CLAUDE.md) を参照してください。
+
+## なぜ半自動か（NotebookLM連携の前提）
+NotebookLM の一般向け公開API は 2026年時点で提供されていません（Enterprise API のみ／一般APIは準備中）。
+公式でない自動化（ブラウザ操作・非公式API）は**採用しません**。そのため、
+
+```
+YouTube
+  → [人] NotebookLM にURL登録し、要約・引用・ノートを作成
+  → [人] Google Docs/Sheets または Markdown/PDF/TXT/CSV で書き出し
+  → inbox/notebooklm_exports/ に配置（または Google Drive MCP で取得）
+  → [自動] 取り込み → 正規化 → 主張抽出(全件"要検証") → claims.json
+  → [検証] Medical Evidence Reviewer が verified を確定（verified_claims.json）
+  → [自動] verified主張のみで4択クイズ生成 → drafts（JSON+Markdown）
+  → [自動] QA検証 → qa_report.md
+  → [人] 承認したものだけ approved へ（approved のみ公開対象）
+```
+
+## セットアップ
+依存パッケージは不要（Python 3.10+ 標準ライブラリのみ）。PDFを扱う場合のみ `pip install pypdf`。
+
+```bash
+cd quiz_system
+cp .env.example .env   # 認証情報が要る場合のみ編集（MVPは不要）
+```
+
+## 使い方（あなたが行う操作）
+
+### 1. NotebookLM の書き出しを配置する
+`inbox/notebooklm_exports/` に、NotebookLM の要約・引用・ノートを保存します。
+`.md/.txt/.csv/.pdf` に対応。`.md/.txt` は先頭に次のフロントマターを付けると出典が追跡できます:
+
+```
+---
+title: 動画タイトル
+youtube_url: https://www.youtube.com/watch?v=XXXX
+channel_name: チャンネル名
+published_at: 2025-01-01
+notebook_name: ノート名
+---
+（以下、NotebookLM本文。各文に [01:23] のようにタイムスタンプを残すと引用追跡に有効）
+```
+※ サンプル `SAMPLE_female_pelvic_anatomy.md` が同梱されています。
+
+### 2. 取り込む（要検証の主張として構造化）
+```bash
+python -m src.pipeline ingest
+```
+→ `data/sources/sources.json`, `source_index.json`, `data/claims/claims.json`（全件 needs_review）。
+
+### 3. 医学的検証（Medical Evidence Reviewer）
+`data/claims/claims.json` を確認し、査読資料と照合して確定した主張を
+`data/claims/verified_claims.json` に記載します（`source_quote`・`evidence_level` 必須、D は不可）。
+```bash
+python -m src.pipeline load-verified
+```
+
+### 4. クイズを作成する（Quiz Designer）
+`data/quizzes/quiz_source.json` に問題定義を書きます（verified な claim_ids のみ参照可）。
+```bash
+python -m src.pipeline build-quiz
+```
+→ `data/quizzes/drafts/` に JSON+Markdown、`data/reports/qa_report.md` に QA結果。
+
+### 5. 承認する（人間の医学的確認）
+QAレポートを確認し、問題なければ承認します（公開不可の問題は移動できません）。
+```bash
+python -m src.pipeline approve Q-0001   # drafts → approved
+python -m src.pipeline reject  Q-0002   # drafts → rejected
+```
+
+### まとめて実行 / 状態確認
+```bash
+python -m src.pipeline run-all   # ingest→load-verified→build-quiz→status
+python -m src.pipeline status
+```
+
+## テスト
+```bash
+python -m unittest -v tests.test_pipeline
+```
+
+## ディレクトリ
+```
+quiz_system/
+  CLAUDE.md, README.md, .env.example
+  config/config.json
+  inbox/notebooklm_exports/      # 投入口（サンプル同梱）
+  agents/                        # 7エージェントの役割定義
+  src/
+    schemas.py  db.py  pipeline.py
+    ingestion/  normalization/  claims/  quiz_generation/  validation/  export/
+  data/
+    sources/{raw,normalized}/  sources.json  source_index.json
+    claims/{claims.json, verified_claims.json}
+    quizzes/{drafts,approved,rejected,quiz_source.json}
+    reports/  database/quiz.db
+  tests/test_pipeline.py
+```
+
+## 安全・ガバナンス（実装済み）
+- 出典追跡：Quiz は verified な `claim_ids`/`source_ids` 必須。無いと生成されない。
+- エビデンス管理：A/B/C/D。**D は公開不可**、公開は原則 B 以上。
+- 断定・固定観念の禁止語チェック、選択肢長の偏り検出、重複検出。
+- 反応・対話・痛みに触れる章は `consent_note`/`individual_variation_note` を推奨/必須。
+- 承認前(draft)は公開データ(approved)に混ざらない。
+- 認証情報はコードに書かず `.env`（gitignore済）。Google Drive連携は最小権限MCPを利用。
+
+## Google Drive 連携（任意 / Phase 10）
+Claude Code の Google Drive MCP（読み取り）で書き出しを取得できます。
+`search_files` → `read_file_content`/`download_file_content` で本文を取得し、
+`inbox/notebooklm_exports/` に保存してから `ingest` を実行します。
+パスワード・Cookie・ブラウザログイン情報は保存しません。
+```
+1. NotebookLMの書き出しをDriveの専用フォルダ（読み取り専用共有）に集約
+2. .env に GOOGLE_DRIVE_FOLDER_ID を設定（config.google_drive.enabled=true）
+3. Claude Code に「Driveの当該フォルダの新規ファイルを取り込んで」と指示
+```
+
+## 免責
+本システムは**教育目的**です。医療行為・診断ではありません。痛み・出血・持続する不快感などは
+医療機関への相談を促す設計です。整体等で性機能障害を治療できると断定しません。

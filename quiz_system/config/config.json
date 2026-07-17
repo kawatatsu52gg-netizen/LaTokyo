@@ -1,0 +1,33 @@
+{
+  "paths": {
+    "inbox": "inbox/notebooklm_exports",
+    "raw": "data/sources/raw",
+    "normalized": "data/sources/normalized",
+    "sources_json": "data/sources/sources.json",
+    "source_index": "data/sources/source_index.json",
+    "claims_json": "data/claims/claims.json",
+    "quiz_drafts": "data/quizzes/drafts",
+    "quiz_approved": "data/quizzes/approved",
+    "quiz_rejected": "data/quizzes/rejected",
+    "reports": "data/reports",
+    "database": "data/database/quiz.db",
+    "logs": "data/reports/pipeline.log"
+  },
+  "quiz_generation": {
+    "min_evidence_level_for_publish": "B",
+    "target_quiz_count": 10,
+    "forbid_all_correct_option": true,
+    "forbid_none_of_above": true
+  },
+  "qa": {
+    "max_choice_length_ratio": 1.8,
+    "banned_absolute_terms": ["必ず感じる", "全員が", "誰でも必ず", "絶対に", "100%の女性"],
+    "banned_arousal_terms": [],
+    "require_consent_note_chapters": [6, 7, 8, 9]
+  },
+  "google_drive": {
+    "enabled": false,
+    "folder_id": "",
+    "note": "Google Drive連携はMCP経由（読み取り最小権限）。有効化はREADME参照。"
+  }
+}
