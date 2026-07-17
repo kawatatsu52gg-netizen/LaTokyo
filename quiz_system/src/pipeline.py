@@ -35,6 +35,7 @@ from .claims.extract import build_claims
 from .quiz_generation.generate import assemble_quiz, write_quiz_files
 from .validation.qa import qa_quiz, detect_duplicates
 from .validation.score import score_quiz
+from .validation.evaluate import evaluate_quiz
 from .export.report import build_report, write_report
 
 
@@ -301,6 +302,112 @@ def cmd_reject(quiz_id: str) -> None:
 
 # --- status -------------------------------------------------------------
 
+def cmd_review(source_filter: str = "") -> None:
+    """
+    生成済みクイズを10観点(各10点/合計100点)で再評価し、
+    - 総合 >= 85 かつ 重大問題なし → 公開候補として data/quizzes/review_candidates.md に保存
+    - 総合 < 85 → 要修正としてログに列挙（承認しない）
+    - 重大問題(出典不足/エビデンスD/正解の曖昧さ/QA不可) → rejected 判定をログに列挙
+    approve は行わない。
+    """
+    db = _db()
+    verified = db.get_verified_claims()
+    verified_ids = {c["claim_id"] for c in verified}
+    claims_by_id = {c["claim_id"]: c for c in verified}
+    db.close()
+
+    qsrc = P["quiz_drafts"].parent / "quiz_source.json"
+    defs = json.loads(qsrc.read_text(encoding="utf-8"))
+    sources = {s["source_id"]: s for s in json.loads(P["sources_json"].read_text(encoding="utf-8"))}
+
+    if source_filter:
+        defs = [d for d in defs if source_filter in d.get("source_ids", [])]
+
+    candidates: list[tuple[Quiz, object]] = []
+    to_fix: list[str] = []
+    to_reject: list[str] = []
+    for d in defs:
+        q = Quiz.from_dict(d)
+        card = evaluate_quiz(q, verified_ids, claims_by_id)
+        if card.verdict == "reject":
+            to_reject.append(f"{q.quiz_id} (総合{card.total}) {card.issues}")
+        elif card.verdict == "fix":
+            to_fix.append(f"{q.quiz_id} (総合{card.total}) {card.issues}")
+        else:
+            candidates.append((q, card))
+
+    md = _render_review_md(candidates, sources, claims_by_id)
+    out = P["quiz_drafts"].parent / "review_candidates.md"
+    out.write_text(md, encoding="utf-8")
+    log(f"review 完了: 公開候補 {len(candidates)} / 要修正 {len(to_fix)} / 却下 {len(to_reject)}")
+    for x in to_fix:
+        log(f"  要修正: {x}")
+    for x in to_reject:
+        log(f"  却下: {x}")
+    log(f"  → 公開候補は {out} に保存（approveは未実行）")
+
+
+def _render_review_md(candidates, sources, claims_by_id) -> str:
+    from .validation.evaluate import EvalCard  # noqa
+    DIM_JP = {
+        "medical_accuracy": "医学的正確性", "clarity": "分かりやすさ",
+        "single_answer": "正解一意", "choice_naturalness": "選択肢の自然さ",
+        "explanation_value": "解説の教育的価値", "traceability": "出典追跡性",
+        "male_education_fit": "男性向け適切さ", "no_generalization": "一括りにしない",
+        "not_technique_biased": "テクニック非偏重", "consent_communication": "同意・対話",
+    }
+    lines = [
+        "# 公開候補クイズ（レビュー用・未承認）",
+        "",
+        f"- 生成日時: {_now()}",
+        f"- 公開候補数: {len(candidates)} 問（各10観点/100点で85点以上・重大問題なし）",
+        "- ※ approve は未実行。人間の最終確認後に `python -m src.pipeline approve <id>` で承認してください。",
+        "",
+        "---",
+        "",
+    ]
+    for q, card in candidates:
+        src = sources.get(q.source_ids[0], {}) if q.source_ids else {}
+        ts = " / ".join(f"{cid}:{claims_by_id.get(cid,{}).get('timestamp','?')}" for cid in q.claim_ids)
+        lines += [
+            f"## {q.quiz_id}  第{q.chapter}章 / Level {q.level}  （総合 {card.total}/100）",
+            "",
+            f"**1. 問題文**：{q.question}",
+            "",
+            "**2. 選択肢**",
+            *[f"- {k}：{q.choices[k]}" + ("　◀正解" if k == q.correct_answer else "") for k in "ABCD"],
+            "",
+            f"**3. 正解**：{q.correct_answer}",
+            "",
+            f"**4. 正解の解説**：{q.choice_explanations[q.correct_answer]}",
+            "",
+            "**5. 各不正解が誤りである理由**",
+            *[f"- {k}：{q.choice_explanations[k]}" for k in "ABCD" if k != q.correct_answer],
+            "",
+            f"**6. 解剖・生理の解説**：{q.explanation}",
+            "",
+            f"**7. 出典**：source_ids={q.source_ids} / claim_ids={q.claim_ids}",
+            f"**8. 動画タイトル**：{src.get('title','?')}",
+            f"**9. YouTube URL**：{src.get('youtube_url','?')}",
+            f"**10. 該当タイムスタンプ**：{ts}",
+            f"**11. エビデンスレベル**：{q.evidence_level}",
+            f"**12. 要検証事項**：{q.needs_verification or 'なし'}",
+            f"**13. 個人差の注意**：{q.individual_variation_note or '—'}",
+            f"**　　同意・安全の注意**：{q.consent_note or '—'}",
+            f"**　　日常/対話への応用**：{q.practical_point or '—'}",
+            "",
+            "**評価（10観点／各10点）**",
+            "",
+            "| " + " | ".join(DIM_JP[k] for k in DIM_JP) + " | 合計 |",
+            "|" + "---|" * (len(DIM_JP) + 1),
+            "| " + " | ".join(f"{card.dims[k]:.1f}" for k in DIM_JP) + f" | **{card.total:.1f}** |",
+            "",
+            "---",
+            "",
+        ]
+    return "\n".join(lines)
+
+
 def cmd_status() -> None:
     db = _db()
     log("=== ステータス ===")
@@ -332,6 +439,7 @@ COMMANDS = {
     "load-verified": cmd_load_verified,
     "build-quiz": cmd_build_quiz,
     "report": cmd_report,
+    "review": cmd_review,
     "status": cmd_status,
     "run-all": cmd_run_all,
 }
@@ -350,6 +458,8 @@ def main(argv: list[str]) -> int:
         if len(argv) < 2:
             print("usage: reject <quiz_id>"); return 1
         cmd_reject(argv[1]); return 0
+    if cmd == "review":
+        cmd_review(argv[1] if len(argv) > 1 else ""); return 0
     fn = COMMANDS.get(cmd)
     if not fn:
         print(f"unknown command: {cmd}\n"); print(__doc__); return 1
