@@ -13,3 +13,5 @@ data/sources/normalized/*
 !data/sources/normalized/.gitkeep
 
 data/reports/pipeline.log
+
+node_modules/

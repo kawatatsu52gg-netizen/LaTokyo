@@ -1,0 +1,15 @@
+{
+  "name": "med-content-os",
+  "version": "1.0.0",
+  "private": true,
+  "description": "医学コンテンツ制作OS Dashboard（NotebookLM→Knowledge Base→Quiz→Review）。npm run dev で起動。",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "start": "node scripts/dev.js",
+    "bootstrap": "node scripts/dev.js --bootstrap-only",
+    "test": "python3 -m unittest tests.test_pipeline tests.test_kb tests.test_content tests.test_dashboard"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -10,6 +10,31 @@ YouTube → NotebookLM で整理した情報を**根拠(出典)として**、成
 > `python -m src.pipeline dashboard` → http://127.0.0.1:8765/ （設計は [docs/DASHBOARD.md](docs/DASHBOARD.md)）。
 > Dashboard/ワンクリック追加/Topic Manager/Review Center/Search/Daily Report の6画面。
 
+## クイックスタート（Dashboardを起動）
+
+```bash
+cd quiz_system
+npm install     # 依存パッケージ不要。オフラインでも一瞬で完了します
+npm run dev     # 初回データ準備 → http://127.0.0.1:8765/ でDashboardが開きます
+```
+
+`npm run dev` は以下を自動で行います（`scripts/dev.js`）：
+1. Python バックエンドの存在確認（Python 3.10+。無ければ案内）
+2. 初回データ準備（`kb.db`/`quiz.db` が無ければ、同梱のNotebookLMサンプルを
+   取り込み → 検証反映 → クイズ生成 → Knowledge Base 構築 → グラフからクイズ自動生成）
+3. ブラウザ用 Dashboard サーバを起動（`127.0.0.1` のみ・外部公開しない）
+
+- ポート変更：`PORT=9000 npm run dev`
+- データだけ作り直す：`npm run bootstrap`
+- テスト：`npm test`
+
+> **構成**：フロント（`src/dashboard/static/index.html` のSPA）＋ API/エンジンは Python
+> 標準ライブラリのみ（`src/dashboard/`, `src/pipeline.py`）。`npm` は起動ランチャーで、
+> JS依存パッケージはありません。ブラウザだけで NotebookLM取込→KB→Quiz→Review→承認 まで動きます。
+
+ブラウザだけで完結しない工程（新しい動画のNotebookLM整理、claimの医学的検証）は
+[docs/OPERATIONS_MANUAL.md](docs/OPERATIONS_MANUAL.md) と [docs/SOP.md](docs/SOP.md) を参照してください。
+
 > 目的は性的テクニックの一方的な指導ではなく、**女性の身体には大きな個人差がある**ことの理解と、
 > パートナーとの**対話・同意・安心感・相互理解**を通じた満足度向上のための**教育**です。
 > 制作の絶対ルールは [CLAUDE.md](CLAUDE.md) を参照してください。
