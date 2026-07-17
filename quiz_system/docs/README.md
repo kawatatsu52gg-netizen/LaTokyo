@@ -1,6 +1,7 @@
 # ドキュメント目次
 
 ## 運用（まずここから）
+- **[DASHBOARD.md](DASHBOARD.md)** — 医学コンテンツ制作OS（ブラウザDashboard）UIモック/画面遷移/技術構成/実装順序。`python -m src.pipeline dashboard` で起動
 - **[OPERATIONS_MANUAL.md](OPERATIONS_MANUAL.md)** — 第三者スタッフ向け運用マニュアル（役割・コマンド早見・トラブル対応・用語集）
 - **[SOP.md](SOP.md)** — 標準作業手順書（選定→NotebookLM→KB→QA→公開の全12工程）
 

@@ -269,10 +269,15 @@ def cmd_build_quiz() -> None:
 # --- approve / reject ---------------------------------------------------
 
 def _move_quiz(quiz_id: str, dest_dir: Path, new_status: str, guard_publishable: bool) -> None:
+    # drafts と kb_generated の両方から探す（Review Centerからの承認に対応）
     src_json = P["quiz_drafts"] / f"{quiz_id}.json"
+    kbgen = P["quiz_drafts"].parent / "kb_generated" / f"{quiz_id}.json"
+    if not src_json.exists() and kbgen.exists():
+        src_json = kbgen
     if not src_json.exists():
-        log(f"{new_status}: {quiz_id} は drafts に存在しません。")
+        log(f"{new_status}: {quiz_id} は drafts / kb_generated に存在しません。")
         return
+    src_md = src_json.with_suffix(".md")
     q = Quiz.from_dict(json.loads(src_json.read_text(encoding="utf-8")))
     if guard_publishable:
         r = qa_quiz(q, CONFIG.get("qa", {}))
@@ -285,9 +290,9 @@ def _move_quiz(quiz_id: str, dest_dir: Path, new_status: str, guard_publishable:
     (dest_dir / f"{quiz_id}.json").write_text(
         json.dumps(q.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
     (dest_dir / f"{quiz_id}.md").write_text(render_markdown(q), encoding="utf-8")
-    # draft からは撤去（公開前後を混在させない）
+    # 元(draft/kb_generated)からは撤去（公開前後を混在させない）
     src_json.unlink(missing_ok=True)
-    (P["quiz_drafts"] / f"{quiz_id}.md").unlink(missing_ok=True)
+    src_md.unlink(missing_ok=True)
     db = _db(); db.upsert_quiz(q); db.close()
     log(f"{new_status}: {quiz_id} を {dest_dir.name} へ移動")
 
@@ -559,6 +564,9 @@ def main(argv: list[str]) -> int:
         if len(argv) < 2:
             print('usage: content-all "<subject>"'); return 1
         cmd_content_all(argv[1]); return 0
+    if cmd == "dashboard":
+        from .dashboard.server import serve
+        serve(int(argv[1]) if len(argv) > 1 else 8765); return 0
     fn = COMMANDS.get(cmd)
     if not fn:
         print(f"unknown command: {cmd}\n"); print(__doc__); return 1

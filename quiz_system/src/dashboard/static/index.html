@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>医学コンテンツ制作OS</title>
+<style>
+  :root { --bg:#0f1420; --panel:#182033; --ink:#e8edf7; --sub:#93a1c0; --line:#26314a;
+          --accent:#4f8cff; --ok:#39c07a; --warn:#f0b429; --bad:#ef5b6b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { display:flex; align-items:center; gap:16px; padding:12px 20px;
+           background:var(--panel); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5;}
+  header h1 { font-size:16px; margin:0; }
+  header .badge { font-size:11px; color:var(--sub); border:1px solid var(--line); padding:2px 8px; border-radius:20px;}
+  nav { display:flex; gap:4px; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line);
+        flex-wrap:wrap; position:sticky; top:49px; z-index:4;}
+  nav button { background:transparent; color:var(--sub); border:none; padding:8px 14px; border-radius:8px;
+               cursor:pointer; font-size:14px; }
+  nav button.active { background:var(--accent); color:#fff; }
+  main { padding:20px; max-width:1100px; margin:0 auto; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .card .k { font-size:12px; color:var(--sub); }
+  .card .v { font-size:28px; font-weight:700; margin-top:6px; }
+  .card .v.small{ font-size:18px; }
+  h2 { font-size:15px; margin:22px 0 10px; color:var(--ink); }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:12px; overflow:hidden;}
+  th,td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--line); font-size:13px;}
+  th { color:var(--sub); font-weight:600; }
+  .btn { background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:14px;}
+  .btn.big { padding:14px 28px; font-size:16px; }
+  .btn.ok{background:var(--ok);} .btn.bad{background:var(--bad);} .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+  .qcard { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:12px;}
+  .pill { font-size:11px; padding:2px 8px; border-radius:20px; border:1px solid var(--line); color:var(--sub);}
+  .pill.A{color:#8fe6b6;border-color:#2c6c4c;} .pill.B{color:#bcd3ff;border-color:#2c4a7c;}
+  .pill.C{color:#f2d18a;border-color:#7c642c;} .pill.D{color:#f2a1ab;border-color:#7c2c38;}
+  .choice { padding:6px 10px; border:1px solid var(--line); border-radius:8px; margin:4px 0; font-size:13px;}
+  .choice.correct { border-color:var(--ok); background:rgba(57,192,122,.08);}
+  input,textarea,select { background:#0d1322; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-size:14px; width:100%;}
+  textarea{ min-height:90px; font-family:inherit;}
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .log { background:#0a0f1a; border:1px solid var(--line); border-radius:10px; padding:12px; font-family:ui-monospace,monospace;
+         font-size:12px; white-space:pre-wrap; max-height:340px; overflow:auto; color:#a9c7ff;}
+  .muted{ color:var(--sub); font-size:13px; }
+  .sec{ margin-bottom:8px; }
+  pre.md{ background:#0a0f1a; border:1px solid var(--line); border-radius:10px; padding:14px; white-space:pre-wrap; font-size:12.5px; max-height:420px; overflow:auto;}
+  a{ color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🩺 医学コンテンツ制作OS</h1>
+  <span class="badge">Single Source of Truth = Knowledge Base</span>
+  <span class="badge" id="kbver">KB —</span>
+</header>
+<nav>
+  <button data-tab="dashboard" class="active">Dashboard</button>
+  <button data-tab="workflow">ワンクリック追加</button>
+  <button data-tab="topics">Topic Manager</button>
+  <button data-tab="review">Review Center</button>
+  <button data-tab="search">Search</button>
+  <button data-tab="daily">Daily Report</button>
+</nav>
+<main id="view"><p class="muted">読み込み中…</p></main>
+
+<script>
+const api = {
+  get: (p)=>fetch(p).then(r=>r.json()),
+  post: (p,b)=>fetch(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(r=>r.json()),
+};
+const el = (h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;};
+const esc = (s)=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const view = document.getElementById('view');
+let TAB='dashboard';
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); TAB=b.dataset.tab; render();
+});
+
+function card(k,v,small){return `<div class="card"><div class="k">${k}</div><div class="v ${small?'small':''}">${v}</div></div>`;}
+
+async function render(){
+  view.innerHTML='<p class="muted">読み込み中…</p>';
+  if(TAB==='dashboard') return renderDashboard();
+  if(TAB==='workflow') return renderWorkflow();
+  if(TAB==='topics') return renderTopics();
+  if(TAB==='review') return renderReview();
+  if(TAB==='search') return renderSearch();
+  if(TAB==='daily') return renderDaily();
+}
+
+async function renderDashboard(){
+  const s = await api.get('/api/summary');
+  document.getElementById('kbver').textContent =
+    `KB: claim ${s.kb.claims||0} / edge ${s.kb.edges||0}`;
+  const q = s.quality||{};
+  view.innerHTML = `
+    <div class="grid">
+      ${card('今日追加した動画', s.today_videos)}
+      ${card('NotebookLM待ち(inbox)', s.notebooklm_pending)}
+      ${card('未レビューClaim', s.unreviewed_claims)}
+      ${card('レビュー待ちQuiz', s.review_quizzes)}
+      ${card('公開待ちコンテンツ', s.publish_pending_content)}
+      ${card('品質スコア(平均/100)', (q.avg||0)+' <span class="muted">('+(q.count||0)+'問)</span>',true)}
+    </div>
+    <h2>生成済みコンテンツ</h2>
+    <div class="grid">
+      ${card('Instagram', s.instagram)}
+      ${card('Slides', s.slides)}
+      ${card('YouTube台本', s.youtube)}
+      ${card('コンテンツ合計', s.content.total)}
+    </div>
+    <h2>Knowledge Base 統計</h2>
+    <div class="grid">
+      ${card('Topics', s.kb.topics)}
+      ${card('Sources', s.kb.sources)}
+      ${card('Entities', s.kb.entities)}
+      ${card('Claims(verified)', (s.kb.verified||0)+'/'+(s.kb.claims||0),true)}
+      ${card('Edges', s.kb.edges)}
+      ${card('KB最終更新', s.kb_last_build, true)}
+    </div>
+    <p class="muted">Evidence内訳: ${Object.entries(s.kb.evidence||{}).map(([k,v])=>k+':'+v).join('  ')}
+      ／ Source種別: ${Object.entries(s.kb.sources_by_type||{}).map(([k,v])=>k+':'+v).join('  ')}</p>`;
+}
+
+async function renderWorkflow(){
+  view.innerHTML = `
+    <h2>動画を追加する（ワンクリック）</h2>
+    <p class="muted">手順: NotebookLMの書き出しを <code>inbox/notebooklm_exports/</code> に置く →
+      下のボタンを押すと Import→Claim抽出→KB更新→Evidence反映→Quiz生成→Instagram/Slide/YouTube生成→QA→レビュー待ちへ配置 を一括実行します。<br>
+      ※ 新規claimは安全のため needs_review のまま。医学レビュアの検証後に公開できます。</p>
+    <div class="row"><button class="btn big" id="run">▶ 一括実行</button>
+      <span class="muted" id="wfstate"></span></div>
+    <h2>実行ログ</h2>
+    <div class="log" id="wflog">（未実行）</div>`;
+  document.getElementById('run').onclick = async ()=>{
+    document.getElementById('wfstate').textContent='実行中…';
+    document.getElementById('wflog').textContent='処理中です。しばらくお待ちください…';
+    const r = await api.post('/api/workflow',{});
+    document.getElementById('wfstate').textContent = r.ok?'完了':'エラー';
+    document.getElementById('wflog').textContent = (r.log||[]).join('\n');
+  };
+}
+
+async function renderTopics(){
+  const t = await api.get('/api/topics');
+  const rows = t.map(x=>`<tr>
+    <td>${esc(x.name)} <span class="muted">${x.parent?'('+esc(x.parent)+')':''}</span></td>
+    <td>${x.videos}</td><td>${x.claims}</td><td>${x.evidence_AB}</td>
+    <td>${x.quizzes}</td><td>${x.instagram}</td><td>${x.slides}</td></tr>`).join('');
+  view.innerHTML = `<h2>Topic Manager（テーマ別の蓄積状況）</h2>
+    <table><thead><tr><th>テーマ</th><th>動画</th><th>Claim</th><th>Evidence(A/B)</th>
+      <th>Quiz</th><th>Instagram</th><th>Slide</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="muted">「Evidence(A/B)」は verified かつ A/B の主張数。テーマ名で <code>generate</code> するとInstagram/Slideが増えます。</p>`;
+}
+
+let REVIEW_KIND='quiz';
+async function renderReview(){
+  view.innerHTML = `<h2>Review Center（人による確認）</h2>
+    <div class="row" style="margin-bottom:12px">
+      ${['quiz','instagram','slides','youtube'].map(k=>`<button class="btn ghost rk" data-k="${k}">${k}</button>`).join('')}
+    </div><div id="rlist" class="muted">読み込み中…</div>`;
+  document.querySelectorAll('.rk').forEach(b=>b.onclick=()=>{REVIEW_KIND=b.dataset.k; loadReview();});
+  loadReview();
+}
+async function loadReview(){
+  const box=document.getElementById('rlist');
+  box.innerHTML='読み込み中…';
+  const items = await api.get('/api/review?kind='+REVIEW_KIND);
+  if(!items.length){ box.innerHTML='<p class="muted">対象がありません。</p>'; return; }
+  if(REVIEW_KIND==='quiz'){
+    box.innerHTML='';
+    items.forEach(q=>{
+      const ch = ['A','B','C','D'].map(k=>`<div class="choice ${q.correct_answer===k?'correct':''}">${k}. ${esc((q.choices||{})[k])}</div>`).join('');
+      const c = el(`<div class="qcard">
+        <div class="row"><b>${q.id}</b> <span class="pill">${esc(q.quiz_type)}</span>
+          <span class="pill ${q.evidence_level}">Evidence ${q.evidence_level}</span>
+          <span class="muted">${esc(q.source_folder)}</span></div>
+        <p>${esc(q.question)}</p>${ch}
+        <p class="muted">解説: ${esc(q.explanation)}</p>
+        <p class="muted">出典: claim ${esc((q.claim_ids||[]).join(','))} / source ${esc((q.source_ids||[]).join(','))}</p>
+        <div class="row">
+          <button class="btn ok">Approve</button>
+          <button class="btn bad">Reject</button>
+          <button class="btn ghost">Edit</button></div>
+        <div class="editbox" style="display:none;margin-top:10px"></div></div>`);
+      const [ap,rj,ed]=c.querySelectorAll('button');
+      ap.onclick=async()=>{await api.post('/api/approve',{id:q.id}); loadReview();};
+      rj.onclick=async()=>{await api.post('/api/reject',{id:q.id}); loadReview();};
+      ed.onclick=()=>{
+        const eb=c.querySelector('.editbox');
+        eb.style.display='block';
+        eb.innerHTML=`<div class="sec"><label class="muted">問題文</label><textarea class="eq">${esc(q.question)}</textarea></div>
+          <div class="sec"><label class="muted">解説</label><textarea class="ee">${esc(q.explanation)}</textarea></div>
+          <button class="btn">保存してQA</button><span class="muted qares"></span>`;
+        eb.querySelector('button').onclick=async()=>{
+          const r=await api.post('/api/edit',{id:q.id,updates:{question:eb.querySelector('.eq').value,explanation:eb.querySelector('.ee').value}});
+          eb.querySelector('.qares').textContent = r.ok?(r.publishable?' ✅ QA公開可':' ⚠️ '+(r.errors||[]).join(' / ')):' エラー';
+        };
+      };
+      box.appendChild(c);
+    });
+  } else {
+    box.innerHTML='';
+    items.forEach(it=>{
+      const c=el(`<div class="qcard"><div class="row"><b>${esc(it.subject)}</b>
+        <span class="pill">${esc(it.format)}</span></div>
+        <pre class="md">${esc((it.content||'').slice(0,4000))}</pre></div>`);
+      box.appendChild(c);
+    });
+  }
+}
+
+async function renderSearch(){
+  view.innerHTML = `<h2>Search（Knowledge Base 横断検索）</h2>
+    <div class="row"><input id="q" placeholder="例: 陰核背神経 / 骨盤底筋 / 性交痛 / S2〜S4"
+       style="max-width:420px"><button class="btn" id="go">検索</button></div>
+    <div id="sres" style="margin-top:16px"></div>`;
+  const run=async()=>{
+    const q=document.getElementById('q').value;
+    const r=await api.get('/api/search?q='+encodeURIComponent(q));
+    const grp=(title,arr,fn)=>arr&&arr.length?`<h2>${title}（${arr.length}）</h2>`+arr.map(fn).join(''):'';
+    document.getElementById('sres').innerHTML =
+      grp('関連エンティティ',r.entities,x=>`<div class="choice">${esc(x.name)} <span class="muted">${esc(x.etype)}</span></div>`)
+    + grp('Claim',r.claims,x=>`<div class="choice"><span class="pill ${x.evidence_level}">${x.evidence_level}</span> ${esc(x.statement)} <span class="muted">[${esc(x.verification_status)}] ${esc((x.sources||[]).join(','))}</span></div>`)
+    + grp('Evidence(A/B・検証済)',r.evidence,x=>`<div class="choice correct">${esc(x.statement)} <span class="muted">${esc((x.sources||[]).join(','))}</span></div>`)
+    + grp('関連動画',r.videos,x=>`<div class="choice">🎬 ${esc(x.title)} <span class="muted">${esc(x.channel)}</span> <a href="${esc(x.url)}" target="_blank">開く</a></div>`)
+    + grp('論文・教科書',r.papers_textbooks,x=>`<div class="choice">📄 [${esc(x.type)}] ${esc(x.title)} <span class="muted">${esc(x.authors)}</span></div>`)
+    + grp('Quiz',r.quizzes,x=>`<div class="choice">❓ ${esc(x.question)} <span class="pill ${x.evidence_level}">${x.evidence_level}</span></div>`)
+    + grp('Instagram',r.instagram,x=>`<div class="choice">📷 ${esc(x.subject)}</div>`)
+    + grp('Slides',r.slides,x=>`<div class="choice">🖥 ${esc(x.subject)}</div>`)
+    + grp('YouTube',r.youtube,x=>`<div class="choice">▶ ${esc(x.subject)}</div>`)
+    || '<p class="muted">該当なし。</p>';
+  };
+  document.getElementById('go').onclick=run;
+  document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')run();});
+}
+
+async function renderDaily(){
+  const d = await api.get('/api/daily');
+  const q=d.quality||{};
+  view.innerHTML = `<h2>Daily Report（${d.date}）</h2>
+    <div class="grid">
+      ${card('追加した動画', d.added_videos)}
+      ${card('KB Claim総数', d.kb_total_claims)}
+      ${card('うち検証済み', d.kb_verified)}
+      ${card('KB Edge数', d.kb_edges)}
+      ${card('未レビューClaim', d.claims_needs_review)}
+      ${card('公開済みQuiz', d.published_quizzes)}
+      ${card('レビュー待ち', d.review_pending)}
+      ${card('コンテンツ総数', d.content_total)}
+      ${card('品質スコア(平均)', (q.avg||0), true)}
+    </div>
+    <p class="muted">この画面は毎回最新の集計を表示します。日次の記録として保存する場合はスクリーンショット/コピーをご利用ください。</p>`;
+}
+
+render();
+</script>
+</body>
+</html>
