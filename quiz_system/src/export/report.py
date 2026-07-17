@@ -11,6 +11,7 @@ from pathlib import Path
 
 from ..schemas import Quiz, CHAPTERS
 from ..validation.qa import QAResult
+from ..validation.score import ScoreCard, scorecard_table
 
 
 def build_report(
@@ -21,6 +22,7 @@ def build_report(
     claim_total: int,
     claim_verified: int,
     generated_at: str,
+    scorecards: dict[str, ScoreCard] | None = None,
 ) -> str:
     ok = [q for q in quizzes if qa_results[q.quiz_id].publishable]
     ng = [q for q in quizzes if not qa_results[q.quiz_id].publishable]
@@ -44,6 +46,19 @@ def build_report(
         cho = [q for q in chq if qa_results[q.quiz_id].publishable]
         if chq:
             lines.append(f"| {ch} | {name} | {len(chq)} | {len(cho)} |")
+    # 採点表
+    if scorecards:
+        cards = [scorecards[q.quiz_id] for q in quizzes if q.quiz_id in scorecards]
+        avg = round(sum(c.total for c in cards) / len(cards), 1) if cards else 0.0
+        need = sum(1 for c in cards if c.needs_fix)
+        lines += [
+            "",
+            f"## 品質採点（6観点 各5点・合計30点）平均 {avg}/30 / 要修正 {need}問",
+            "",
+            scorecard_table(cards),
+            "",
+        ]
+
     lines += ["", "## 問題別チェック結果", ""]
 
     for q in quizzes:
@@ -53,6 +68,11 @@ def build_report(
         lines.append(f"- 設問: {q.question[:60]}")
         lines.append(f"- エビデンス: {q.evidence_level} / review_status: {q.review_status}")
         lines.append(f"- 出典: claim_ids={q.claim_ids} source_ids={q.source_ids}")
+        if scorecards and q.quiz_id in scorecards:
+            sc = scorecards[q.quiz_id]
+            lines.append(f"- 採点: 合計 {sc.total}/30 {'⚠️要修正' if sc.needs_fix else '✅'}")
+            for note in sc.notes:
+                lines.append(f"    - 採点メモ: {note}")
         if r.errors:
             lines.append("- ⛔ エラー:")
             lines += [f"    - {e}" for e in r.errors]

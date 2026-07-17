@@ -1,0 +1,32 @@
+{
+  "quiz_id": "Q-2002",
+  "chapter": 2,
+  "level": 2,
+  "question": "MRIなどの画像研究が示す、陰核複合体の全体的な大きさの目安はどれですか。",
+  "choices": {
+    "A": "全体で約1cm程度にとどまる",
+    "B": "全体で約9〜10cmに達しうる",
+    "C": "全体で約30cmに達しうる",
+    "D": "大きさは全員でほぼ同一である"
+  },
+  "correct_answer": "B",
+  "explanation": "MRI・解剖研究により、陰核複合体は脚や前庭球を含めると全体で約9〜10cmに達しうることが示されています。数値は目安で、個体差があります。",
+  "choice_explanations": {
+    "A": "見える亀頭は数mm〜でも、複合体全体はより大きいです。",
+    "B": "正しい。複合体全体で約9〜10cmに達しうるとされます。",
+    "C": "約30cmは過大で、解剖学的事実に合いません。",
+    "D": "大きさには個人差があり、全員同一ではありません。"
+  },
+  "practical_point": "数値の暗記より「見えない部分に広がる立体構造」という理解が役立ちます。",
+  "individual_variation_note": "大きさ・形には個人差があり、数値はあくまで目安です。",
+  "consent_note": "",
+  "source_ids": [
+    "SRC-0002"
+  ],
+  "claim_ids": [
+    "CLM-2002"
+  ],
+  "evidence_level": "B",
+  "needs_verification": "",
+  "review_status": "reviewed"
+}

@@ -3,8 +3,22 @@
     "source_id": "SRC-0001",
     "title": "女性骨盤解剖と神経支配の基礎（サンプル講義）",
     "youtube_url": "https://www.youtube.com/watch?v=SAMPLE0001",
+    "channel_name": "Medical Anatomy Education (SAMPLE)",
     "notebook_export_file": "SAMPLE_female_pelvic_anatomy.md",
+    "meta_complete": true,
+    "missing_required": [],
     "claim_count": 22,
     "needs_review": 22
+  },
+  {
+    "source_id": "SRC-0002",
+    "title": "陰核の解剖と女性の性反応 ― 神経科学からの理解",
+    "youtube_url": "https://www.youtube.com/watch?v=RC7xNc2sR01",
+    "channel_name": "Sexual Medicine Lecture (Sample)",
+    "notebook_export_file": "YT_clitoris_sexual_response_2025.md",
+    "meta_complete": true,
+    "missing_required": [],
+    "claim_count": 31,
+    "needs_review": 31
   }
 ]

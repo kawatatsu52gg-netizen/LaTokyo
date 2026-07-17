@@ -1,0 +1,32 @@
+[
+  {
+    "claim_id": "CLM-2101",
+    "statement": "骨盤矯正や整体を受ければ不感症は必ず改善する。",
+    "topic": "俗説の訂正",
+    "anatomical_region": "",
+    "nerve": "",
+    "receptor": "",
+    "stimulus_type": "none",
+    "timestamp": "15:10",
+    "source_quote": "「骨盤矯正や整体を受ければ不感症は必ず改善する」",
+    "evidence_level": "D",
+    "verification_status": "rejected",
+    "source_id": "SRC-0002",
+    "review_notes": "却下。治療効果を『必ず』と断定。エビデンス不十分で、医療行為と教育の混同・過剰医療化のリスク。正しい情報はCLM-2015を参照。"
+  },
+  {
+    "claim_id": "CLM-2102",
+    "statement": "Gスポットは膣前壁にある独立した器官で、正しく押せば全ての女性が潮吹きする。",
+    "topic": "俗説の訂正",
+    "anatomical_region": "膣",
+    "nerve": "",
+    "receptor": "",
+    "stimulus_type": "none",
+    "timestamp": "15:45",
+    "source_quote": "「Gスポットは膣前壁にある独立した器官で、正しく押せば全ての女性が潮吹きする」",
+    "evidence_level": "D",
+    "verification_status": "rejected",
+    "source_id": "SRC-0002",
+    "review_notes": "却下。独立器官としてのGスポットは組織学的に未確立(議論あり=本来C相当)。加えて『全ての女性が』は過度な一般化で固定観念を助長するため rejected。"
+  }
+]

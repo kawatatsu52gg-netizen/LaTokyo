@@ -34,6 +34,7 @@ from .normalization.normalize import (
 from .claims.extract import build_claims
 from .quiz_generation.generate import assemble_quiz, write_quiz_files
 from .validation.qa import qa_quiz, detect_duplicates
+from .validation.score import score_quiz
 from .export.report import build_report, write_report
 
 
@@ -128,10 +129,16 @@ def cmd_ingest() -> None:
                 "source_id": source_id,
                 "title": src.title,
                 "youtube_url": src.youtube_url,
+                "channel_name": src.channel_name,
                 "notebook_export_file": f.name,
+                "meta_complete": res.meta_complete,
+                "missing_required": res.missing_required,
                 "claim_count": len(claims),
                 "needs_review": sum(1 for c in claims if c.verification_status == "needs_review"),
             })
+            if not res.meta_complete:
+                log(f"ingest 注意: {source_id} は必須メタ {res.missing_required} が欠落。"
+                    "この情報源のclaimはverified化できません。")
             all_claims.extend(c.to_dict() for c in claims)
             log(f"ingest: {f.name} -> {source_id} (claims={len(claims)}, 全て要検証)")
         except Exception as e:  # 失敗してもファイル単位で継続
@@ -165,29 +172,41 @@ def _merge_json_list(path: Path, new_items: list[dict], key: str) -> None:
 
 def cmd_load_verified() -> None:
     """
-    Medical Evidence Reviewer が確定した検証済みclaimを DB に登録する。
-    ファイル: data/claims/verified_claims.json
-    （NotebookLMの要約そのものではなく、査読資料等と照合済みの確定版）
+    Medical Evidence Reviewer の判定を DB に反映する（3分類の振り分け）。
+      - data/claims/verified_claims.json … 照合済みで確定 → verified
+      - data/claims/rejected_claims.json … 誤り・俗説と判定 → rejected
+      - それ以外の自動抽出claim … needs_review のまま（既定）
+    NotebookLMの要約を無条件に事実扱いせず、claim単位で状態を持たせる。
     """
-    vpath = P["claims_json"].parent / "verified_claims.json"
-    if not vpath.exists():
-        log(f"load-verified: {vpath} が無いためスキップ（検証済みclaimは未登録）。")
-        return
     db = _db()
-    data = json.loads(vpath.read_text(encoding="utf-8"))
-    n = 0
-    for d in data:
-        c = Claim.from_dict(d)
-        c.verification_status = "verified"
-        errs = c.validate()
-        if errs:
-            log(f"load-verified 検証NG {c.claim_id}: {errs}")
-            continue
-        db.upsert_claim(d.get("source_id", ""), c)
-        n += 1
+    base = P["claims_json"].parent
+    n_v = n_r = 0
+
+    vpath = base / "verified_claims.json"
+    if vpath.exists():
+        for d in json.loads(vpath.read_text(encoding="utf-8")):
+            c = Claim.from_dict(d)
+            c.verification_status = "verified"
+            errs = c.validate()
+            if errs:
+                log(f"load-verified 検証NG {c.claim_id}: {errs}")
+                continue
+            db.upsert_claim(d.get("source_id", ""), c)
+            n_v += 1
+    else:
+        log(f"load-verified: {vpath} が無いためスキップ（verified未登録）。")
+
+    rpath = base / "rejected_claims.json"
+    if rpath.exists():
+        for d in json.loads(rpath.read_text(encoding="utf-8")):
+            c = Claim.from_dict(d)
+            c.verification_status = "rejected"
+            db.upsert_claim(d.get("source_id", ""), c)
+            n_r += 1
+
     db.conn.commit()
     db.close()
-    log(f"load-verified 完了: verified claim {n} 件を登録")
+    log(f"load-verified 完了: verified {n_v} 件 / rejected {n_r} 件を反映")
 
 
 # --- build-quiz ---------------------------------------------------------
@@ -222,8 +241,9 @@ def cmd_build_quiz() -> None:
         built.append(q)
         log(f"build-quiz: {q.quiz_id} をdraftsへ書き出し")
 
-    # QA
+    # QA + 採点
     qa_results = {q.quiz_id: qa_quiz(q, CONFIG.get("qa", {})) for q in built}
+    scorecards = {q.quiz_id: score_quiz(q) for q in built}
     dups = detect_duplicates(built)
 
     report = build_report(
@@ -234,12 +254,15 @@ def cmd_build_quiz() -> None:
         claim_total=db.count("claims"),
         claim_verified=len(verified_ids),
         generated_at=_now(),
+        scorecards=scorecards,
     )
     write_report(report, P["reports"])
     db.close()
 
     pub = sum(1 for r in qa_results.values() if r.publishable)
-    log(f"build-quiz 完了: {len(built)}問生成 / 公開可 {pub} / レポート: {P['reports']/'qa_report.md'}")
+    fix = sum(1 for s in scorecards.values() if s.needs_fix)
+    log(f"build-quiz 完了: {len(built)}問生成 / 公開可 {pub} / 要修正 {fix} / "
+        f"レポート: {P['reports']/'qa_report.md'}")
 
 
 # --- approve / reject ---------------------------------------------------

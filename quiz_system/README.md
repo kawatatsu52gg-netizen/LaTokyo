@@ -23,6 +23,22 @@ YouTube
   → [人] 承認したものだけ approved へ（approved のみ公開対象）
 ```
 
+## 対応する書き出し形式
+| 形式 | 拡張子 | 備考 |
+|---|---|---|
+| Markdown | `.md` | 推奨。フロントマター＋タイムスタンプ付き本文 |
+| テキスト（Google Docs書き出し等） | `.txt` | Docsを「書式なしテキスト」で書き出したもの |
+| PDF | `.pdf` | `pip install pypdf` が入っていれば抽出。無ければ警告してスキップ |
+| CSV（Sheets等） | `.csv` | 列 `statement, quote, timestamp` などを想定 |
+
+## NotebookLMからの書き出し手順（毎回同じ形式にする）
+- `templates/notebooklm_prompt.md` … NotebookLMのチャットに貼り付ける専用プロンプト（動画から
+  医学的主張・解剖用語・神経名・脊髄分節・受容器・刺激種別・性反応・個人差・注意点・タイムスタンプ・
+  直接引用・要検証事項・疑わしい主張を抽出）。
+- `templates/notebooklm_export_template.md` … 出力を流し込む雛形。先頭の**必須項目**
+  （title / youtube_url / channel_name / published_at / notebook_name）を必ず埋める。
+- これらが欠けた情報源の claim は verified 化できません（出典追跡のため）。
+
 ## セットアップ
 依存パッケージは不要（Python 3.10+ 標準ライブラリのみ）。PDFを扱う場合のみ `pip install pypdf`。
 
@@ -55,12 +71,16 @@ python -m src.pipeline ingest
 ```
 → `data/sources/sources.json`, `source_index.json`, `data/claims/claims.json`（全件 needs_review）。
 
-### 3. 医学的検証（Medical Evidence Reviewer）
-`data/claims/claims.json` を確認し、査読資料と照合して確定した主張を
-`data/claims/verified_claims.json` に記載します（`source_quote`・`evidence_level` 必須、D は不可）。
+### 3. 医学的検証（Medical Evidence Reviewer）＝ 3分類の振り分け
+`data/claims/claims.json`（取り込み直後は**全件 needs_review**）を確認し、査読資料と照合して:
+- 確定 → `data/claims/verified_claims.json`（`source_quote`・`evidence_level` 必須、D は不可）
+- 誤り・俗説 → `data/claims/rejected_claims.json`
+- それ以外はそのまま **needs_review**（クイズには使われない）
 ```bash
-python -m src.pipeline load-verified
+python -m src.pipeline load-verified   # verified / rejected を反映
 ```
+> NotebookLMの要約を無条件に事実扱いしません。動画の断定的な主張（例「整体で必ず治る」）は
+> rejected に、根拠が弱い主張（例「神経は約8,000本」）は needs_review に振り分けられます。
 
 ### 4. クイズを作成する（Quiz Designer）
 `data/quizzes/quiz_source.json` に問題定義を書きます（verified な claim_ids のみ参照可）。

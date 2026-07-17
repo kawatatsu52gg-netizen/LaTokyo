@@ -36,6 +36,10 @@ from typing import Any
 
 SUPPORTED = {".md", ".txt", ".csv", ".pdf"}
 
+# 出典追跡のため、情報源(source)レベルで必須のメタ項目。
+# これらが欠けるとその情報源からの claim は verified にできない設計。
+REQUIRED_META = ["title", "youtube_url", "channel_name"]
+
 
 @dataclass
 class IngestResult:
@@ -45,6 +49,21 @@ class IngestResult:
     rows: list[dict[str, str]] = field(default_factory=list)  # csv用
     content_hash: str = ""
     warnings: list[str] = field(default_factory=list)
+    missing_required: list[str] = field(default_factory=list)  # 必須メタの欠落
+
+    @property
+    def meta_complete(self) -> bool:
+        return not self.missing_required
+
+
+def check_required_meta(meta: dict[str, str]) -> list[str]:
+    """必須メタ項目のうち、欠落 or 空 or 未記入テンプレ値のものを返す。"""
+    missing: list[str] = []
+    for k in REQUIRED_META:
+        v = (meta.get(k) or "").strip()
+        if not v or v.startswith("（") or v.lower() in ("todo", "xxxx", "ここに"):
+            missing.append(k)
+    return missing
 
 
 def _hash(text: str) -> str:
@@ -104,6 +123,7 @@ def ingest_file(path: str | Path) -> IngestResult:
             for key in ("title", "youtube_url", "channel_name", "published_at", "notebook_name"):
                 if key in res.rows[0]:
                     res.meta[key] = res.rows[0][key]
+        res.missing_required = check_required_meta(res.meta)
         return res
 
     if ext == ".pdf":
@@ -119,9 +139,11 @@ def ingest_file(path: str | Path) -> IngestResult:
     res.meta = meta
     res.body = body
     res.content_hash = _hash(body)
-    if not meta.get("youtube_url"):
+    res.missing_required = check_required_meta(meta)
+    if res.missing_required:
         res.warnings.append(
-            f"{path.name}: youtube_url が未記載。出典追跡のためフロントマターの記入を推奨します。"
+            f"{path.name}: 必須メタ項目が未記入です {res.missing_required}。"
+            "出典追跡のためフロントマターを埋めてください（この情報源のclaimはverified化不可）。"
         )
     return res
 

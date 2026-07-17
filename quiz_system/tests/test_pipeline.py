@@ -43,9 +43,18 @@ class TestQA(unittest.TestCase):
         r = qa_quiz(_good_quiz(evidence_level="D"))
         self.assertFalse(r.publishable)
 
-    def test_absolute_term_rejected(self):
+    def test_absolute_term_in_authoritative_rejected(self):
         r = qa_quiz(_good_quiz(explanation="女性は必ず感じる。"))
         self.assertFalse(r.publishable)
+
+    def test_absolute_term_in_distractor_allowed(self):
+        # 誤り選択肢に断定語があっても、解説で否定していれば公開可（警告のみ）
+        r = qa_quiz(_good_quiz(
+            choices={"A": "外性器全体の総称", "B": "全員が同じと決まっている",
+                     "C": "内性器", "D": "尿道口だけ"},
+            choice_explanations={"A": "正しい。総称。", "B": "個人差があり誤り。",
+                                 "C": "内性器。", "D": "一部のみ。"}))
+        self.assertTrue(r.publishable, r.errors)
 
     def test_all_of_above_rejected(self):
         r = qa_quiz(_good_quiz(choices={"A": "外性器の総称", "B": "膣のこと",

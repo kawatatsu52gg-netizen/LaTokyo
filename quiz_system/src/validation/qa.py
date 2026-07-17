@@ -89,15 +89,28 @@ def qa_quiz(q: Quiz, config: dict | None = None) -> QAResult:
             r.add_error(f"選択肢{k}の説明(choice_explanations)が空")
 
     # 5/7. 断定・固定観念
-    haystack = " ".join([q.question, q.explanation, *q.choices.values(),
-                         *q.choice_explanations.values()])
+    # 断定・固定観念の禁止は「教材として主張している文」に適用する。
+    # 不正解の選択肢(distractor)は、誤った断定をあえて提示して否定する狙いがあるため、
+    # 正解肢・設問・解説・各選択肢の解説のみを対象にする（distractor本文は除外）。
+    authoritative = " ".join([
+        q.question, q.explanation, q.choices.get(q.correct_answer, ""),
+        *q.choice_explanations.values(),
+    ])
     for term in banned_abs + DEFAULT_BANNED_STEREOTYPE:
-        if term in haystack:
+        if term in authoritative:
             r.add_error(f"過度な断定/固定観念表現: 「{term}」")
+    # distractorに断定語がある場合は、解説で明確に否定しているか警告で促す
+    for k, v in q.choices.items():
+        if k == q.correct_answer:
+            continue
+        for term in banned_abs + DEFAULT_BANNED_STEREOTYPE:
+            if term in v and term not in q.choice_explanations.get(k, ""):
+                r.add_warning(f"選択肢{k}の断定「{term}」は誤り選択肢。解説で否定されているか確認")
 
     # 6. 煽る表現（教育目的から逸脱するトーン）
+    full = authoritative + " " + " ".join(q.choices.values())
     for term in _AROUSAL_HEURISTICS:
-        if term in haystack:
+        if term in full:
             r.add_warning(f"表現トーン要確認: 「{term}」")
 
     # 9. 同意・個人差の配慮（該当章）
