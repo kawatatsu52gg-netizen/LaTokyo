@@ -40,6 +40,15 @@ LABELS = {
     "per":          ["PER", "株価収益率"],
     "pbr":          ["PBR", "株価純資産倍率"],
     "div_yield":    ["配当利回り", "利回り"],
+    # --- Phase 2 ---
+    "revenue":      ["売上高", "営業収益", "売上収益", "経常収益", "売上"],
+    "op_profit":    ["営業利益", "営業益", "事業利益"],
+    "fcf":          ["フリーCF", "フリーキャッシュフロー", "FCF", "フリーCF(億)"],
+    "roic":         ["ROIC", "投下資本利益率"],
+    "doe":          ["DOE", "純資産配当率", "株主資本配当率"],
+    "payout":       ["配当性向"],
+    "dps":          ["1株配当", "一株配当", "1株配", "配当金", "年間配当"],
+    "buyback":      ["自社株買い", "自己株式の取得", "自己株取得", "自社株取得"],
 }
 
 _YEAR_RE = re.compile(r"(19|20)\d{2}\s*[/.\-年]?\s*\d{0,2}")
@@ -61,6 +70,17 @@ class StockData:
     ocf_latest: Optional[float] = None
     ocf_positive_years: Optional[int] = None
     ocf_total_years: Optional[int] = None
+    # --- Phase 2 ---
+    revenue_series: list[Optional[float]] = field(default_factory=list)
+    op_profit_series: list[Optional[float]] = field(default_factory=list)
+    dividend_series: list[Optional[float]] = field(default_factory=list)
+    fcf_latest: Optional[float] = None
+    fcf_positive_years: Optional[int] = None
+    fcf_total_years: Optional[int] = None
+    roic: Optional[float] = None
+    doe: Optional[float] = None
+    payout_ratio: Optional[float] = None
+    buyback_years: Optional[int] = None
     sources: list[str] = field(default_factory=list)
 
 
@@ -191,7 +211,42 @@ def fetch_irbank(code: str, session: requests.Session) -> StockData:
             roe = _extract_row_series(results, LABELS["roe"])
             if roe:
                 data.roe = roe[-1]
+        # --- Phase 2 系列 ---
+        data.revenue_series = _extract_row_series(results, LABELS["revenue"])
+        data.op_profit_series = _extract_row_series(results, LABELS["op_profit"])
+        fcf = _extract_row_series(results, LABELS["fcf"])
+        if fcf:
+            data.fcf_latest = fcf[-1]
+            data.fcf_positive_years = sum(1 for x in fcf if x > 0)
+            data.fcf_total_years = len(fcf)
+        roic = _extract_row_series(results, LABELS["roic"])
+        if roic:
+            data.roic = roic[-1]
         data.sources.append(f"{base}/results")
+
+    # 配当ページ: DPS系列(増配年数用)・配当性向・DOE
+    dividend = _get(f"{base}/dividend", session)
+    if dividend is not None:
+        data.dividend_series = _extract_row_series(dividend, LABELS["dps"])
+        payout = _extract_row_series(dividend, LABELS["payout"])
+        if payout:
+            data.payout_ratio = payout[-1]
+        else:
+            data.payout_ratio = _extract_single(dividend, LABELS["payout"])
+        doe = _extract_row_series(dividend, LABELS["doe"])
+        if doe:
+            data.doe = doe[-1]
+        else:
+            data.doe = _extract_single(dividend, LABELS["doe"])
+        data.sources.append(f"{base}/dividend")
+
+    # 自社株買い: 実施年数(取得額の行から正の年をカウント)
+    buyback = _get(f"{base}/buyback", session)
+    if buyback is not None:
+        bb = _extract_row_series(buyback, LABELS["buyback"])
+        if bb:
+            data.buyback_years = sum(1 for x in bb if x and x != 0)
+        data.sources.append(f"{base}/buyback")
 
     return data
 

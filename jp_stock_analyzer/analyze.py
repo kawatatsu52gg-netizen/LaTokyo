@@ -56,6 +56,23 @@ def analyze_one(data: StockData) -> dict:
         ocf_positive_years=data.ocf_positive_years,
         ocf_total_years=data.ocf_total_years,
     )
+    p2 = eval_core.score_phase2(
+        revenue_series=data.revenue_series,
+        op_profit_series=data.op_profit_series,
+        eps_series=data.eps_series,
+        roe=data.roe,
+        roic=data.roic,
+        fcf_latest=data.fcf_latest,
+        ocf_latest=data.ocf_latest,
+        payout=data.payout_ratio,
+        doe=data.doe,
+        dividend_series=data.dividend_series,
+        buyback_years=data.buyback_years,
+        fcf_pos_years=data.fcf_positive_years,
+        fcf_total_years=data.fcf_total_years,
+        ocf_pos_years=data.ocf_positive_years,
+        ocf_total_years=data.ocf_total_years,
+    )
     return {
         "code": data.code,
         "name": data.name or "",
@@ -71,6 +88,19 @@ def analyze_one(data: StockData) -> dict:
         "total": score.total,
         "rank": eval_core.rank_star(score.total),
         "breakdown": score.breakdown,
+        # --- Phase 2 ---
+        "rev_cagr": p2.metrics["rev_cagr"],
+        "op_cagr": p2.metrics["op_cagr"],
+        "eps_cagr": p2.metrics["eps_cagr"],
+        "roic": data.roic,
+        "fcf": data.fcf_latest,
+        "doe": data.doe,
+        "div_up_years": p2.metrics["div_up_years"],
+        "buyback_years": data.buyback_years,
+        "payout": data.payout_ratio,
+        "p2_total": p2.total,
+        "p2_rank": eval_core.rank_star(p2.total),
+        "p2_breakdown": p2.breakdown,
     }
 
 
@@ -82,7 +112,11 @@ def _fmt(v, suffix=""):
 def write_csv(rows: list[dict], path: Path) -> None:
     cols = ["コード", "会社名", "EPS評価", "PER", "PBR", "ROE",
             "営業利益率", "自己資本比率", "営業CF", "配当利回り",
-            "総合点", "ランク", "コメント"]
+            "総合点", "ランク", "コメント",
+            # --- Phase 2 ---
+            "売上成長率10y", "営業利益成長率10y", "EPS成長率10y",
+            "ROIC", "FCF", "DOE", "増配年数", "自社株買い年数",
+            "配当性向", "Phase2総合点", "Phase2ランク"]
     with path.open("w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
         w.writerow(cols)
@@ -92,6 +126,9 @@ def write_csv(rows: list[dict], path: Path) -> None:
                 r["per"], r["pbr"], r["roe"], r["op_margin"],
                 r["equity_ratio"], r["ocf"], r["div_yield"],
                 r["total"], r["rank"], r["eps_reason"],
+                r["rev_cagr"], r["op_cagr"], r["eps_cagr"],
+                r["roic"], r["fcf"], r["doe"], r["div_up_years"],
+                r["buyback_years"], r["payout"], r["p2_total"], r["p2_rank"],
             ])
 
 
@@ -146,6 +183,40 @@ def write_report(rows: list[dict], errors: list[tuple[str, str]], path: Path) ->
         if hit:
             for r in hit:
                 L.append(f"- {r['code']} {r['name']} … {r['total']}点")
+        else:
+            L.append("- (該当なし)")
+        L.append("")
+
+    # --- Phase 2: 成長性 + 資本効率 + 株主還元 ---
+    L.append("## Phase 2 総合評価(成長性・資本効率・株主還元)\n")
+    L.append("|コード|会社名|売上成長率|営業利益成長率|EPS成長率|ROE|ROIC|FCF|"
+             "配当性向|DOE|増配年数|自社株買い|営業CF|Phase2点|ランク|")
+    L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    for r in sorted(rows, key=lambda x: x["p2_total"], reverse=True):
+        L.append(
+            "|{c}|{n}|{rc}|{oc}|{ec}|{roe}|{roic}|{fcf}|{po}|{doe}|{du}|{bb}|{ocf}|{t}|{rk}|".format(
+                c=r["code"], n=r["name"],
+                rc=_fmt(r["rev_cagr"], "%"), oc=_fmt(r["op_cagr"], "%"),
+                ec=_fmt(r["eps_cagr"], "%"), roe=_fmt(r["roe"], "%"),
+                roic=_fmt(r["roic"], "%"), fcf=_fmt(r["fcf"]),
+                po=_fmt(r["payout"], "%"), doe=_fmt(r["doe"], "%"),
+                du=r["div_up_years"] if r["div_up_years"] is not None else "-",
+                bb=r["buyback_years"] if r["buyback_years"] is not None else "-",
+                ocf=_fmt(r["ocf"]), t=r["p2_total"], rk=r["p2_rank"]))
+    L.append("")
+
+    L.append("### Phase 2 ランキング\n")
+    p2_buckets = [("★★★★★（90点以上）", 90, 999),
+                  ("★★★★☆（80〜89点）", 80, 90),
+                  ("★★★☆☆（70〜79点）", 70, 80),
+                  ("それ以下（69点以下）", -999, 70)]
+    for title, lo, hi in p2_buckets:
+        L.append(f"#### {title}\n")
+        hit = sorted([r for r in rows if lo <= r["p2_total"] < hi],
+                     key=lambda x: x["p2_total"], reverse=True)
+        if hit:
+            for r in hit:
+                L.append(f"- {r['code']} {r['name']} … {r['p2_total']}点")
         else:
             L.append("- (該当なし)")
         L.append("")

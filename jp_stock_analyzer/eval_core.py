@@ -202,6 +202,150 @@ def rank_star(total: float) -> str:
     return "★☆☆☆☆"
 
 
+# ===========================================================================
+# Phase 2 : 成長性 + 資本効率 + 株主還元の総合評価(100点満点)
+# ===========================================================================
+# 配点(合計100):
+#   10年売上成長率   10   10年営業利益成長率 12   10年EPS成長率 15
+#   ROE 14   ROIC 12   FCF 10   営業CF 7
+#   配当性向 6   DOE 5   増配年数 6   自社株買い 3
+PHASE2_POINTS = {
+    "rev_cagr": 10, "op_cagr": 12, "eps_cagr": 15,
+    "roe": 14, "roic": 12, "fcf": 10, "ocf": 7,
+    "payout": 6, "doe": 5, "div_up": 6, "buyback": 3,
+}
+
+
+def cagr(series: list[Optional[float]]) -> Optional[float]:
+    """年次系列(古い→新しい)の年平均成長率(%)。始点/終点が非正なら None。"""
+    vals = [v for v in series if v is not None]
+    if len(vals) < 2:
+        return None
+    first, last = vals[0], vals[-1]
+    if first <= 0 or last <= 0:
+        return None
+    years = len(vals) - 1
+    return ((last / first) ** (1.0 / years) - 1.0) * 100.0
+
+
+def consecutive_increase_years(series: list[Optional[float]]) -> int:
+    """系列末尾から見て、前年より増加し続けている年数(連続増配年数など)。"""
+    vals = [v for v in series if v is not None]
+    cnt = 0
+    for i in range(len(vals) - 1, 0, -1):
+        if vals[i] > vals[i - 1]:
+            cnt += 1
+        else:
+            break
+    return cnt
+
+
+def _band(value: Optional[float], bands: list[tuple[float, float]],
+          maxp: float) -> float:
+    """value を降順しきい値 bands[(threshold, fraction)] で採点。"""
+    if value is None:
+        return 0.0
+    for thr, frac in bands:
+        if value >= thr:
+            return round(maxp * frac, 1)
+    return 0.0
+
+
+def _score_cashflow(latest: Optional[float], pos_years: Optional[int],
+                    total_years: Optional[int], maxp: float) -> float:
+    """キャッシュフロー系: 直近プラス + 過去も概ねプラスなら高得点。"""
+    if latest is None or latest <= 0:
+        return 0.0
+    if pos_years is not None and total_years:
+        ratio = pos_years / total_years
+        if ratio >= 0.9:
+            return maxp
+        if ratio >= 0.7:
+            return round(maxp * 0.8, 1)
+        return round(maxp * 0.6, 1)
+    return round(maxp * 0.8, 1)
+
+
+def _score_payout(p: Optional[float], maxp: float) -> float:
+    """配当性向: 30〜60%を最良とし、過小・過大は減点。"""
+    if p is None or p <= 0:
+        return 0.0
+    if 30 <= p <= 60:
+        return maxp
+    if 20 <= p < 30 or 60 < p <= 80:
+        return round(maxp * 0.7, 1)
+    if 10 <= p < 20 or 80 < p <= 100:
+        return round(maxp * 0.4, 1)
+    return round(maxp * 0.15, 1)      # 10%未満 or 100%超
+
+
+def _score_buyback(years: Optional[int], maxp: float) -> float:
+    """自社株買い: 直近数年で実施していれば加点。"""
+    if years is None:
+        return 0.0
+    if years >= 3:
+        return maxp
+    if years == 2:
+        return round(maxp * 0.7, 1)
+    if years == 1:
+        return round(maxp * 0.4, 1)
+    return 0.0
+
+
+@dataclass
+class Phase2Result:
+    total: float
+    breakdown: dict
+    metrics: dict          # 計算済みの成長率など(表示用)
+
+
+def score_phase2(revenue_series: list,
+                 op_profit_series: list,
+                 eps_series: list,
+                 roe: Optional[float],
+                 roic: Optional[float],
+                 fcf_latest: Optional[float],
+                 ocf_latest: Optional[float],
+                 payout: Optional[float],
+                 doe: Optional[float],
+                 dividend_series: list,
+                 buyback_years: Optional[int],
+                 fcf_pos_years: Optional[int] = None,
+                 fcf_total_years: Optional[int] = None,
+                 ocf_pos_years: Optional[int] = None,
+                 ocf_total_years: Optional[int] = None) -> Phase2Result:
+    P = PHASE2_POINTS
+    rev_cagr = cagr(revenue_series)
+    op_cagr = cagr(op_profit_series)
+    eps_cagr = cagr(eps_series)
+    div_up = consecutive_increase_years(dividend_series or [])
+
+    growth_bands = [(15, 1.0), (10, 0.85), (7, 0.65), (3, 0.4), (0, 0.15)]
+    roe_bands = [(15, 1.0), (12, 0.85), (10, 0.7), (8, 0.55), (5, 0.35), (0, 0.1)]
+    roic_bands = [(12, 1.0), (9, 0.8), (7, 0.6), (5, 0.4), (3, 0.2), (0, 0.05)]
+    doe_bands = [(4, 1.0), (3, 0.8), (2, 0.6), (1, 0.35), (0, 0.1)]
+    divup_bands = [(10, 1.0), (7, 0.8), (5, 0.6), (3, 0.4), (1, 0.2)]
+
+    bd = {
+        "売上成長率(10)":   _band(rev_cagr, growth_bands, P["rev_cagr"]),
+        "営業利益成長率(12)": _band(op_cagr, growth_bands, P["op_cagr"]),
+        "EPS成長率(15)":    _band(eps_cagr, growth_bands, P["eps_cagr"]),
+        "ROE(14)":         _band(roe, roe_bands, P["roe"]),
+        "ROIC(12)":        _band(roic, roic_bands, P["roic"]),
+        "FCF(10)":         _score_cashflow(fcf_latest, fcf_pos_years, fcf_total_years, P["fcf"]),
+        "営業CF(7)":       _score_cashflow(ocf_latest, ocf_pos_years, ocf_total_years, P["ocf"]),
+        "配当性向(6)":      _score_payout(payout, P["payout"]),
+        "DOE(5)":          _band(doe, doe_bands, P["doe"]),
+        "増配年数(6)":      _band(div_up, divup_bands, P["div_up"]),
+        "自社株買い(3)":    _score_buyback(buyback_years, P["buyback"]),
+    }
+    metrics = {
+        "rev_cagr": rev_cagr, "op_cagr": op_cagr, "eps_cagr": eps_cagr,
+        "div_up_years": div_up,
+    }
+    return Phase2Result(round(sum(bd.values()), 1), bd, metrics)
+
+
 # ---------------------------------------------------------------------------
 # 単体テスト
 # ---------------------------------------------------------------------------
@@ -241,6 +385,35 @@ def _selftest() -> None:
                      ocf_latest=-5, dividend_yield=0.5)
     assert s2.total < 60, s2
     assert rank_star(s2.total) == "★☆☆☆☆"
+
+    # --- Phase 2 ---
+    assert abs(cagr([100, 200]) - 100.0) < 1e-6                     # 1年で2倍=100%
+    assert cagr([100, 110, 121]) - 10.0 < 1e-6                      # 年10%
+    assert cagr([-5, 10]) is None and cagr([10, -5]) is None        # 非正は除外
+    assert consecutive_increase_years([10, 11, 12, 12, 13, 14]) == 2  # 末尾から連続増
+    assert consecutive_increase_years([5, 6, 7, 8]) == 3
+
+    # 高成長・高効率・還元も厚い優良株 → 満点近く
+    p = score_phase2(
+        revenue_series=[100, 115, 132, 152, 175, 201, 231, 266, 306, 352],
+        op_profit_series=[10, 12, 15, 18, 22, 27, 33, 40, 48, 58],
+        eps_series=[10, 12, 15, 18, 22, 27, 33, 40, 48, 58],
+        roe=18, roic=15, fcf_latest=100, ocf_latest=150,
+        payout=40, doe=4.5, dividend_series=[10, 12, 14, 16, 18, 20, 22, 24, 26, 28],
+        buyback_years=4,
+        fcf_pos_years=10, fcf_total_years=10,
+        ocf_pos_years=10, ocf_total_years=10)
+    assert p.total >= 90, p
+    assert rank_star(p.total) == "★★★★★"
+
+    # 低成長・赤字CF・無配 → 低得点
+    q = score_phase2(
+        revenue_series=[100, 98, 101, 95, 97, 96, 99, 94, 100, 93],
+        op_profit_series=[10, 5, 8, 3, 6, 4, 7, 2, 6, 3],
+        eps_series=[10, 5, 8, 3, 6, 4, 7, 2, 6, 3],
+        roe=3, roic=2, fcf_latest=-10, ocf_latest=-5,
+        payout=None, doe=None, dividend_series=[], buyback_years=0)
+    assert q.total < 40, q
 
     print("eval_core selftest: OK")
 
