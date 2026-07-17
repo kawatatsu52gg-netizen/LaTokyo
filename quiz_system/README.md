@@ -3,6 +3,9 @@
 YouTube → NotebookLM で整理した情報を**根拠(出典)として**、成人男性向けに
 女性の身体を医学的に正しく学ぶ4択クイズを、検証つきで生成する半自動システムです。
 
+> **運用担当の方へ**：実際の制作運用は [docs/OPERATIONS_MANUAL.md](docs/OPERATIONS_MANUAL.md)
+> と [docs/SOP.md](docs/SOP.md) から。文書一覧は [docs/README.md](docs/README.md)。
+
 > 目的は性的テクニックの一方的な指導ではなく、**女性の身体には大きな個人差がある**ことの理解と、
 > パートナーとの**対話・同意・安心感・相互理解**を通じた満足度向上のための**教育**です。
 > 制作の絶対ルールは [CLAUDE.md](CLAUDE.md) を参照してください。
