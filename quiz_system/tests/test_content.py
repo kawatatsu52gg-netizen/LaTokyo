@@ -27,7 +27,7 @@ class TestTemplates(unittest.TestCase):
     def test_every_archetype_exists(self):
         specs = load_templates()
         for s in specs.values():
-            self.assertIn(s["archetype"], set(ARCHETYPES) | {"quiz"})
+            self.assertIn(s["archetype"], set(ARCHETYPES) | {"quiz", "beginner_lesson"})
 
 
 class TestBundleAndRender(unittest.TestCase):

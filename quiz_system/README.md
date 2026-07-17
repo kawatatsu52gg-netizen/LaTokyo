@@ -16,6 +16,19 @@ YouTube → NotebookLM で整理した情報を**根拠(出典)として**、成
 > Learning Designer は `python -m src.pipeline research-design "<主題>"` でコンテンツ一式を生成。
 > ※ Research Teamは提案のみ。KBへの追加は人が NotebookLM→検証→KB の流れで行います（SSoT）。
 
+## 初心者向け学習ゲーム（解剖学を知らない一般男性向け）
+
+KBは専門レベルのまま保持し、初心者向けには **自動でやさしい言葉に変換** します。
+目的は「くわしい人」ではなく **「安心して話し合えるパートナー」** を育てること。
+
+- 3レベル：**Level1 身体を知る / Level2 仕組みを知る / Level3 相互理解を深める**
+- 専門用語は最小・図解前提・1問1知識・小学生でも分かる解説・レベルアップ形式
+- ブラウザ版ゲーム：`npm run dev` → **http://127.0.0.1:8765/game** （XP・バッジ・レベル解放）
+- 生成：`python -m src.pipeline beginner-course`（`data/content/beginner/`）
+- 単一テーマの平易レッスン：`python -m src.pipeline generate beginner "陰核"`
+- やさしい言い換えは `data/beginner/glossary.json`（専門語→やさしい言葉）で管理し、
+  `src/content/plain.py` が自動変換します。
+
 ## クイックスタート（Dashboardを起動）
 
 ```bash

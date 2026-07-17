@@ -406,6 +406,13 @@ def cmd_research_design(subject: str) -> None:
     log(f"research-design 完了: {subject} → {r['count']}形式")
 
 
+def cmd_beginner_course() -> None:
+    """初心者向け3レベル学習コース(平易化・図解前提・ゲーム用)を生成。"""
+    from .content.beginner import write_course_files
+    write_course_files(log=log)
+    log("  ブラウザ版ゲーム: python -m src.pipeline dashboard → http://127.0.0.1:8765/game")
+
+
 def cmd_content_list() -> None:
     from .content.generator import load_templates, list_formats
     specs = load_templates()
@@ -556,6 +563,7 @@ COMMANDS = {
     "kb-build": cmd_kb_build,
     "kb-stats": cmd_kb_stats,
     "content-list": cmd_content_list,
+    "beginner-course": cmd_beginner_course,
     "research": cmd_research,
     "status": cmd_status,
     "run-all": cmd_run_all,

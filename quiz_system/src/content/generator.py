@@ -69,6 +69,16 @@ def generate_content(kb_path: Path, fmt: str, subject: str, log=print) -> Path |
                 (kb.get_entity(b.subject_id) or {}).get("topic_id")
             quizzes = generate(kb, min_evidence=spec.get("min_evidence", "A"), topic_id=topic_id)
             md = _render_quiz_md(b.display_name, quizzes)
+        elif spec["archetype"] == "beginner_lesson":
+            from .beginner import render_beginner_lesson
+            kb.close()
+            md = render_beginner_lesson(subject)
+            subdir = OUT_DIR / _safe_dir(subject)
+            subdir.mkdir(parents=True, exist_ok=True)
+            out = subdir / f"{spec['format']}.md"
+            out.write_text(md, encoding="utf-8")
+            log(f"生成: {spec.get('label', spec['format'])} → {out}")
+            return out
         else:
             b = build_bundle(kb, subject, min_evidence=spec.get("min_evidence", "B"))
             if not b.facts:

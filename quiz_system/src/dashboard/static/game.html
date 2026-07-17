@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>女性の身体を知る 学習ゲーム</title>
+<style>
+  :root{--bg:#0f1420;--panel:#182033;--ink:#e8edf7;--sub:#93a1c0;--line:#26314a;
+        --accent:#4f8cff;--ok:#39c07a;--bad:#ef5b6b;--gold:#f0b429;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);}
+  .wrap{max-width:680px;margin:0 auto;padding:20px;}
+  h1{font-size:18px;}
+  .muted{color:var(--sub);}
+  .bar{height:12px;background:#0d1322;border:1px solid var(--line);border-radius:20px;overflow:hidden;margin:6px 0 14px;}
+  .bar>div{height:100%;background:var(--accent);width:0;transition:width .3s;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;}
+  .fig{background:#0d1322;border:1px dashed var(--line);border-radius:10px;padding:12px;color:var(--sub);font-size:13px;margin:12px 0;}
+  button.choice{display:block;width:100%;text-align:left;background:#0d1322;color:var(--ink);border:1px solid var(--line);
+    border-radius:10px;padding:14px;margin:8px 0;cursor:pointer;font-size:15px;}
+  button.choice:hover{border-color:var(--accent);}
+  button.choice.correct{border-color:var(--ok);background:rgba(57,192,122,.12);}
+  button.choice.wrong{border-color:var(--bad);background:rgba(239,91,107,.12);}
+  .btn{background:var(--accent);color:#fff;border:none;padding:12px 22px;border-radius:10px;cursor:pointer;font-size:15px;}
+  .lv{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .chip{padding:6px 12px;border-radius:20px;border:1px solid var(--line);font-size:13px;color:var(--sub);}
+  .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .chip.locked{opacity:.45;}
+  .badge{font-size:40px;text-align:center;margin:10px;}
+  .explain{background:#0d1322;border-left:3px solid var(--ok);padding:10px 12px;border-radius:6px;margin-top:10px;font-size:14px;}
+  .respect{background:rgba(240,180,41,.08);border-left:3px solid var(--gold);padding:10px 12px;border-radius:6px;margin-top:10px;font-size:14px;}
+  .xp{font-weight:700;color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎮 女性の身体を知る 学習ゲーム</h1>
+  <p class="muted">解剖学を知らなくて大丈夫。図を見ながら1問ずつ。ゴールは「くわしい人」ではなく<b>「安心して話し合えるパートナー」</b>になることです。</p>
+  <div class="lv" id="levels"></div>
+  <div class="bar"><div id="prog"></div></div>
+  <div class="muted">XP: <span class="xp" id="xp">0</span> ／ このレベルの正解: <span id="score">0</span></div>
+  <div id="stage"></div>
+</div>
+<script>
+let COURSE=null, curLevel=1, idx=0, correct=0, xp=0, unlocked={1:true,2:false,3:false};
+
+function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+const $=id=>document.getElementById(id);
+
+async function boot(){
+  COURSE = await fetch('/api/game').then(r=>r.json());
+  renderLevels(); startLevel(1);
+}
+function levelObj(n){return COURSE.levels.find(l=>l.level===n);}
+function renderLevels(){
+  $('levels').innerHTML = COURSE.levels.map(l=>{
+    const lock = !unlocked[l.level];
+    return `<span class="chip ${l.level===curLevel?'active':''} ${lock?'locked':''}" data-l="${l.level}">
+      Lv${l.level} ${esc(l.title)} ${lock?'🔒':''}</span>`;}).join('');
+  document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    const n=+c.dataset.l; if(unlocked[n]) startLevel(n);});
+}
+function startLevel(n){
+  curLevel=n; idx=0; correct=0;
+  const lv=levelObj(n);
+  renderLevels();
+  if(!lv.quizzes.length){ $('stage').innerHTML=`<div class="card">このレベルの問題は準備中です。</div>`; return; }
+  showIntro(lv);
+}
+function showIntro(lv){
+  $('stage').innerHTML=`<div class="card">
+    <div class="badge">${lv.badge.split(' ')[0]}</div>
+    <h2>Level ${lv.level}：${esc(lv.title)}</h2>
+    <p>${esc(lv.goal)}</p>
+    <div class="fig">🖼 図解イメージ：${esc(lv.figure_theme)}</div>
+    <p class="muted">大切なこと：${esc(lv.communication)}</p>
+    <p class="muted">全${lv.quizzes.length}問／${Math.round(COURSE.pass_ratio*100)}%正解でクリア、次のレベルが開きます。</p>
+    <button class="btn" id="go">スタート ▶</button></div>`;
+  $('go').onclick=()=>question();
+  updateBar();
+}
+function question(){
+  const lv=levelObj(curLevel);
+  if(idx>=lv.quizzes.length) return finishLevel(lv);
+  const q=lv.quizzes[idx];
+  $('stage').innerHTML=`<div class="card">
+    <div class="muted">問題 ${idx+1} / ${lv.quizzes.length}</div>
+    <h2 style="font-size:17px">${esc(q.question)}</h2>
+    <div class="fig">🖼 図解ヒント：${esc(q.figure_hint)}</div>
+    <div id="choices"></div>
+    <div id="fb"></div></div>`;
+  const box=$('choices');
+  ['A','B','C','D'].forEach(k=>{
+    if(!q.choices[k]) return;
+    const b=document.createElement('button');
+    b.className='choice'; b.textContent=`${k}. ${q.choices[k]}`;
+    b.onclick=()=>answer(k,q,b); box.appendChild(b);
+  });
+  updateBar();
+}
+function answer(k,q,btn){
+  const right = k===q.correct_answer;
+  document.querySelectorAll('#choices .choice').forEach(b=>b.disabled=true);
+  btn.classList.add(right?'correct':'wrong');
+  if(right){correct++; xp+=10; $('xp').textContent=xp;}
+  $('score').textContent=correct;
+  $('fb').innerHTML=`
+    <div class="explain">${right?'⭕ 正解！':'こう考えよう'} ${esc(q.explain)}</div>
+    <div class="explain">💡 ワンポイント：${esc(q.one_point)}</div>
+    <div class="respect">🤝 大切なこと：${esc(q.respect_note)}</div>
+    <button class="btn" id="next">つぎへ ▶</button>`;
+  $('next').onclick=()=>{idx++; question();};
+  updateBar();
+}
+function finishLevel(lv){
+  const ratio = correct/lv.quizzes.length;
+  const pass = ratio>=COURSE.pass_ratio;
+  if(pass && lv.level<3){ unlocked[lv.level+1]=true; }
+  $('stage').innerHTML=`<div class="card" style="text-align:center">
+    <div class="badge">${pass?lv.badge.split(' ')[0]:'🔁'}</div>
+    <h2>${pass?'レベルクリア！':'もう一歩！'}</h2>
+    <p>${correct} / ${lv.quizzes.length} 問正解（XP +${correct*10}）</p>
+    ${pass?`<p class="xp">${esc(lv.badge)} を獲得！</p>`:''}
+    ${pass&&lv.level<3?`<p>Level ${lv.level+1} が開きました 🔓</p><button class="btn" id="nl">次のレベルへ ▶</button>`:''}
+    ${pass&&lv.level===3?`<p>🎉 全レベル制覇！ あなたは「安心して話し合えるパートナー」に一歩近づきました。</p>`:''}
+    ${!pass?`<button class="btn" id="retry">もう一度</button>`:''}
+  </div>`;
+  renderLevels();
+  if($('nl')) $('nl').onclick=()=>startLevel(lv.level+1);
+  if($('retry')) $('retry').onclick=()=>startLevel(lv.level);
+}
+function updateBar(){
+  const lv=levelObj(curLevel); const n=lv.quizzes.length||1;
+  $('prog').style.width = Math.round(idx/n*100)+'%';
+}
+boot();
+</script>
+</body>
+</html>
