@@ -1,0 +1,39 @@
+[
+  {
+    "source_id": "PAP-0001",
+    "source_type": "paper",
+    "title": "Anatomy of the clitoris and the female sexual response (review)",
+    "authors": "O'Connell HE, et al.",
+    "journal": "The Journal of Urology / Clinical Anatomy",
+    "doi": "10.0000/sample.clitoris.anatomy",
+    "published_at": "2005",
+    "reliability": "A",
+    "imported_at": "2026-07-17",
+    "content_hash": "paper-clitoris-0001"
+  },
+  {
+    "source_id": "PAP-0002",
+    "source_type": "paper",
+    "title": "Innervation of the female pelvis and autonomic control of sexual response",
+    "authors": "Yang CC, et al.",
+    "journal": "Sample Neurourology",
+    "doi": "10.0000/sample.pelvic.innervation",
+    "published_at": "2019",
+    "reliability": "B",
+    "imported_at": "2026-07-17",
+    "content_hash": "paper-innervation-0002"
+  },
+  {
+    "source_id": "TXT-0001",
+    "source_type": "textbook",
+    "title": "Gray's Anatomy (Sample reference for education)",
+    "authors": "Standring S (ed.)",
+    "publisher": "Elsevier (sample)",
+    "isbn": "978-0-000-00000-0",
+    "edition": "42nd (sample)",
+    "published_at": "2020",
+    "reliability": "A",
+    "imported_at": "2026-07-17",
+    "content_hash": "textbook-grays-0001"
+  }
+]

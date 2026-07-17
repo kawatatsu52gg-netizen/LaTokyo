@@ -1,0 +1,20 @@
+[
+  {"topic_id": "TOP-genital", "source_id": "TXT-0001"},
+  {"topic_id": "TOP-genital", "source_id": "PAP-0001"},
+  {"topic_id": "TOP-genital", "source_id": "PAP-0002"},
+  {"topic_id": "TOP-genital", "source_id": "SRC-0001"},
+  {"topic_id": "TOP-genital", "source_id": "SRC-0002"},
+  {"topic_id": "TOP-external", "source_id": "SRC-0001"},
+  {"topic_id": "TOP-external", "source_id": "TXT-0001"},
+  {"topic_id": "TOP-external", "source_id": "PAP-0001"},
+  {"topic_id": "TOP-innervation", "source_id": "SRC-0001"},
+  {"topic_id": "TOP-innervation", "source_id": "SRC-0002"},
+  {"topic_id": "TOP-innervation", "source_id": "PAP-0002"},
+  {"topic_id": "TOP-innervation", "source_id": "TXT-0001"},
+  {"topic_id": "TOP-receptor", "source_id": "SRC-0001"},
+  {"topic_id": "TOP-receptor", "source_id": "TXT-0001"},
+  {"topic_id": "TOP-pelvicfloor", "source_id": "SRC-0002"},
+  {"topic_id": "TOP-pelvicfloor", "source_id": "PAP-0002"},
+  {"topic_id": "TOP-response", "source_id": "SRC-0002"},
+  {"topic_id": "TOP-response", "source_id": "PAP-0002"}
+]

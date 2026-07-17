@@ -1,0 +1,34 @@
+{
+  "quiz_id": "KBQ-CS-015",
+  "quiz_type": "case",
+  "chapter": 8,
+  "level": 3,
+  "question": "あるケース: 尿路感染症の訴えがある。解剖・生理の観点で、関連する要因として最も考えられるのは【　】である。",
+  "choices": {
+    "A": "スキーン腺",
+    "B": "バルトリン腺",
+    "C": "尿道",
+    "D": "前庭球"
+  },
+  "correct_answer": "C",
+  "explanation": "尿道は尿路感染症に関連しうる（短い尿道→UTI好発）。痛み等が続く場合は受診を勧める。",
+  "choice_explanations": {
+    "A": "この関係にはあてはまりません。",
+    "B": "この関係にはあてはまりません。",
+    "C": "正しい。尿道は尿路感染症に関連しうる（短い尿道→UTI好発）。痛み等が続く場合は受診を勧",
+    "D": "この関係にはあてはまりません。"
+  },
+  "practical_point": "知識同士のつながり(グラフ)で理解すると記憶に残りやすい。",
+  "individual_variation_note": "解剖・神経の基本構造は共通だが、感受性や反応には個人差がある。",
+  "consent_note": "症状を我慢させず、必要に応じて医療機関の受診を勧めること。",
+  "source_ids": [
+    "SRC-0001",
+    "TXT-0001"
+  ],
+  "claim_ids": [
+    "CLM-3016"
+  ],
+  "evidence_level": "A",
+  "needs_verification": "グラフ自動生成。人間の医学的確認前(draft)。",
+  "review_status": "draft"
+}

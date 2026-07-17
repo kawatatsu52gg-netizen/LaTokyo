@@ -1,0 +1,34 @@
+{
+  "quiz_id": "KBQ-FB-003",
+  "quiz_type": "fill_blank",
+  "chapter": 3,
+  "level": 1,
+  "question": "陰核背神経は【　】の枝である。",
+  "choices": {
+    "A": "下腹神経",
+    "B": "陰部神経",
+    "C": "迷走神経",
+    "D": "骨盤内臓神経"
+  },
+  "correct_answer": "B",
+  "explanation": "陰核背神経—(branch_of)→陰部神経。陰核背神経は陰部神経の終枝。",
+  "choice_explanations": {
+    "A": "この関係にはあてはまりません。",
+    "B": "正しい。陰核背神経—(branch_of)→陰部神経。陰核背神経は陰部神経の終枝。",
+    "C": "この関係にはあてはまりません。",
+    "D": "この関係にはあてはまりません。"
+  },
+  "practical_point": "知識同士のつながり(グラフ)で理解すると記憶に残りやすい。",
+  "individual_variation_note": "解剖・神経の基本構造は共通だが、感受性や反応には個人差がある。",
+  "consent_note": "",
+  "source_ids": [
+    "SRC-0002",
+    "TXT-0001"
+  ],
+  "claim_ids": [
+    "CLM-3002"
+  ],
+  "evidence_level": "A",
+  "needs_verification": "グラフ自動生成。人間の医学的確認前(draft)。",
+  "review_status": "draft"
+}

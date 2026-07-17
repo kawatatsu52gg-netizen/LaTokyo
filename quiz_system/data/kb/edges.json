@@ -1,0 +1,25 @@
+[
+  {"edge_id": "EDG-0001", "from_entity": "ENT-clitoris", "relation": "part_of", "to_entity": "ENT-clitoris-glans", "evidence_level": "A", "claim_ids": ["CLM-3001"], "note": "陰核複合体の一部(亀頭)"},
+  {"edge_id": "EDG-0002", "from_entity": "ENT-clitoris", "relation": "part_of", "to_entity": "ENT-clitoris-crus", "evidence_level": "A", "claim_ids": ["CLM-3001"], "note": "脚"},
+  {"edge_id": "EDG-0003", "from_entity": "ENT-clitoris", "relation": "part_of", "to_entity": "ENT-vestibular-bulb", "evidence_level": "A", "claim_ids": ["CLM-3001"], "note": "前庭球"},
+
+  {"edge_id": "EDG-0010", "from_entity": "ENT-clitoris-glans", "relation": "innervated_by", "to_entity": "ENT-dn-clitoris", "evidence_level": "A", "claim_ids": ["CLM-3004"], "note": "陰核亀頭の感覚"},
+  {"edge_id": "EDG-0011", "from_entity": "ENT-dn-clitoris", "relation": "branch_of", "to_entity": "ENT-pudendal", "evidence_level": "A", "claim_ids": ["CLM-3002"], "note": "陰核背神経は陰部神経の終枝"},
+  {"edge_id": "EDG-0012", "from_entity": "ENT-pudendal", "relation": "originates_from", "to_entity": "ENT-s2s4", "evidence_level": "A", "claim_ids": ["CLM-3003"], "note": "S2-S4(仙骨神経叢)"},
+  {"edge_id": "EDG-0013", "from_entity": "ENT-pelvic-splanchnic", "relation": "originates_from", "to_entity": "ENT-s2s4", "evidence_level": "A", "claim_ids": ["CLM-3005"], "note": "仙髄由来"},
+  {"edge_id": "EDG-0014", "from_entity": "ENT-pelvic-splanchnic", "relation": "autonomic_type", "to_entity": "ENT-parasympathetic", "evidence_level": "A", "claim_ids": ["CLM-3005"], "note": "副交感"},
+  {"edge_id": "EDG-0015", "from_entity": "ENT-hypogastric", "relation": "autonomic_type", "to_entity": "ENT-sympathetic", "evidence_level": "B", "claim_ids": ["CLM-3006"], "note": "交感"},
+
+  {"edge_id": "EDG-0020", "from_entity": "ENT-clitoris", "relation": "homolog_of", "to_entity": "ENT-penis", "evidence_level": "A", "claim_ids": ["CLM-3011"], "note": "生殖結節由来"},
+  {"edge_id": "EDG-0021", "from_entity": "ENT-labia-majora", "relation": "homolog_of", "to_entity": "ENT-scrotum", "evidence_level": "A", "claim_ids": ["CLM-3012"], "note": ""},
+  {"edge_id": "EDG-0022", "from_entity": "ENT-skene", "relation": "homolog_of", "to_entity": "ENT-prostate", "evidence_level": "A", "claim_ids": ["CLM-3013"], "note": "女性前立腺"},
+
+  {"edge_id": "EDG-0030", "from_entity": "ENT-pacinian", "relation": "responds_to", "to_entity": "ENT-vibration", "evidence_level": "A", "claim_ids": ["CLM-3007"], "note": "高周波振動"},
+  {"edge_id": "EDG-0031", "from_entity": "ENT-meissner", "relation": "responds_to", "to_entity": "ENT-light-touch", "evidence_level": "A", "claim_ids": ["CLM-3008"], "note": "軽い接触"},
+  {"edge_id": "EDG-0032", "from_entity": "ENT-merkel", "relation": "responds_to", "to_entity": "ENT-pressure", "evidence_level": "A", "claim_ids": ["CLM-3009"], "note": "持続圧"},
+  {"edge_id": "EDG-0033", "from_entity": "ENT-ruffini", "relation": "responds_to", "to_entity": "ENT-stretch", "evidence_level": "A", "claim_ids": ["CLM-3010"], "note": "皮膚伸張"},
+
+  {"edge_id": "EDG-0040", "from_entity": "ENT-bulbospongiosus", "relation": "contracts_in", "to_entity": "ENT-clitoris", "evidence_level": "A", "claim_ids": ["CLM-3014"], "note": "オーガズム時の律動収縮(骨盤底)"},
+  {"edge_id": "EDG-0041", "from_entity": "ENT-pf-hypertonicity", "relation": "associated_with", "to_entity": "ENT-dyspareunia", "evidence_level": "B", "claim_ids": ["CLM-3015"], "note": "性交痛の一因"},
+  {"edge_id": "EDG-0042", "from_entity": "ENT-urethra", "relation": "associated_with", "to_entity": "ENT-uti", "evidence_level": "A", "claim_ids": ["CLM-3016"], "note": "短い尿道→UTI好発"}
+]

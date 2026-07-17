@@ -302,6 +302,67 @@ def cmd_reject(quiz_id: str) -> None:
 
 # --- status -------------------------------------------------------------
 
+def cmd_kb_build() -> None:
+    """各種シード/既存データを Knowledge Base(kb.db) に統合する。"""
+    from .kb.build import build
+    stats = build(ROOT / "data" / "database" / "kb.db", log=log)
+    log("kb-build 完了:")
+    for k, v in stats.items():
+        log(f"  {k}: {v}")
+
+
+def cmd_kb_stats() -> None:
+    from .kb.store import KB
+    kb = KB(ROOT / "data" / "database" / "kb.db")
+    log("=== KB 統計 ===")
+    log(f"topics={kb.count('topics')} sources={kb.count('sources')} "
+        f"entities={kb.count('entities')} claims={kb.count('claims')} edges={kb.count('edges')}")
+    log(f"sources種別: {kb.counts_by('sources','source_type')}")
+    log(f"entities種別: {kb.counts_by('entities','etype')}")
+    log(f"claims エビデンス: {kb.counts_by('claims','evidence_level')}")
+    log(f"edges エビデンス: {kb.counts_by('edges','evidence_level')}")
+    kb.close()
+
+
+def cmd_kb_generate(min_evidence: str = "A", topic_id: str = "") -> None:
+    """
+    ナレッジグラフから4種(穴埋め/4択/応用/ケース)のクイズを自動生成。
+    Evidence>=min_evidence のエッジ/パスのみ使用。QAを通し、draftとして保存。
+    """
+    from .kb.store import KB
+    from .kb.generate_kb import generate
+    kb = KB(ROOT / "data" / "database" / "kb.db")
+    quizzes = generate(kb, min_evidence=min_evidence, topic_id=topic_id or None)
+    outdir = P["quiz_drafts"].parent / "kb_generated"
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    by_type: dict[str, int] = {}
+    passed = 0
+    md_lines = [f"# ナレッジグラフ自動生成クイズ（Evidence {min_evidence}以上・未承認draft）", ""]
+    for qd in quizzes:
+        q = Quiz.from_dict(qd)
+        r = qa_quiz(q, CONFIG.get("qa", {}))
+        ok = r.publishable
+        passed += 1 if ok else 0
+        by_type[qd["quiz_type"]] = by_type.get(qd["quiz_type"], 0) + 1
+        kb.upsert_quiz(qd)
+        (outdir / f"{q.quiz_id}.json").write_text(
+            json.dumps(qd, ensure_ascii=False, indent=2), encoding="utf-8")
+        md_lines += [
+            f"## {q.quiz_id}  [{qd['quiz_type']}] 第{q.chapter}章/Lv{q.level}  "
+            f"Evidence {q.evidence_level}  QA:{'OK' if ok else 'NG'}",
+            f"- 問題: {q.question}",
+            *[f"  - {k}: {q.choices[k]}" + ("　◀正解" if k == q.correct_answer else "") for k in "ABCD"],
+            f"- 解説: {q.explanation}",
+            f"- 出典: claim_ids={q.claim_ids} source_ids={q.source_ids}",
+            "",
+        ]
+    kb.commit(); kb.close()
+    (outdir / "kb_generated.md").write_text("\n".join(md_lines), encoding="utf-8")
+    log(f"kb-generate 完了(Evidence>={min_evidence}): 生成{len(quizzes)}問 種別{by_type} / QA公開可{passed}")
+    log(f"  → {outdir}/ に保存（draft・未承認）")
+
+
 def cmd_review(source_filter: str = "") -> None:
     """
     生成済みクイズを10観点(各10点/合計100点)で再評価し、
@@ -440,6 +501,8 @@ COMMANDS = {
     "build-quiz": cmd_build_quiz,
     "report": cmd_report,
     "review": cmd_review,
+    "kb-build": cmd_kb_build,
+    "kb-stats": cmd_kb_stats,
     "status": cmd_status,
     "run-all": cmd_run_all,
 }
@@ -460,6 +523,10 @@ def main(argv: list[str]) -> int:
         cmd_reject(argv[1]); return 0
     if cmd == "review":
         cmd_review(argv[1] if len(argv) > 1 else ""); return 0
+    if cmd == "kb-generate":
+        ev = argv[1] if len(argv) > 1 else "A"
+        topic = argv[2] if len(argv) > 2 else ""
+        cmd_kb_generate(ev, topic); return 0
     fn = COMMANDS.get(cmd)
     if not fn:
         print(f"unknown command: {cmd}\n"); print(__doc__); return 1

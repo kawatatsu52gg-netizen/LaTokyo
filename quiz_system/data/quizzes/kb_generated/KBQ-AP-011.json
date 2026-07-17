@@ -1,0 +1,36 @@
+{
+  "quiz_id": "KBQ-AP-011",
+  "quiz_type": "application",
+  "chapter": 1,
+  "level": 3,
+  "question": "陰核亀頭から関係をたどると、最終的に行き着くのは【　】である。（経路: 陰核亀頭 →(innervated_by) 陰核背神経 →(branch_of) 陰部神経）",
+  "choices": {
+    "A": "陰部神経",
+    "B": "下腹神経",
+    "C": "迷走神経",
+    "D": "陰核背神経"
+  },
+  "correct_answer": "A",
+  "explanation": "経路をたどると 陰核亀頭 →(innervated_by) 陰核背神経 →(branch_of) 陰部神経 となり、答えは陰部神経。",
+  "choice_explanations": {
+    "A": "正しい。経路をたどると 陰核亀頭 →(innervated_by) 陰核背神経 →(br",
+    "B": "この関係にはあてはまりません。",
+    "C": "この関係にはあてはまりません。",
+    "D": "この関係にはあてはまりません。"
+  },
+  "practical_point": "知識同士のつながり(グラフ)で理解すると記憶に残りやすい。",
+  "individual_variation_note": "解剖・神経の基本構造は共通だが、感受性や反応には個人差がある。",
+  "consent_note": "",
+  "source_ids": [
+    "PAP-0001",
+    "TXT-0001",
+    "SRC-0002"
+  ],
+  "claim_ids": [
+    "CLM-3004",
+    "CLM-3002"
+  ],
+  "evidence_level": "A",
+  "needs_verification": "グラフ自動生成。人間の医学的確認前(draft)。",
+  "review_status": "draft"
+}

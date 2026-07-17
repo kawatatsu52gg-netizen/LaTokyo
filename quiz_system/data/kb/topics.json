@@ -1,0 +1,9 @@
+[
+  {"topic_id": "TOP-genital", "name": "女性器", "parent": "", "description": "女性器の解剖・神経・生理を束ねるルートテーマ"},
+  {"topic_id": "TOP-external", "name": "外性器", "parent": "TOP-genital", "description": "外陰部・陰核・陰唇・前庭・尿道など"},
+  {"topic_id": "TOP-internal", "name": "内性器", "parent": "TOP-genital", "description": "膣・子宮・卵巣"},
+  {"topic_id": "TOP-innervation", "name": "神経支配", "parent": "TOP-genital", "description": "陰部神経・骨盤内臓神経・自律神経・脊髄分節"},
+  {"topic_id": "TOP-receptor", "name": "感覚受容", "parent": "TOP-genital", "description": "皮膚・粘膜の感覚受容器"},
+  {"topic_id": "TOP-pelvicfloor", "name": "骨盤底", "parent": "TOP-genital", "description": "骨盤底筋・過緊張・性交痛"},
+  {"topic_id": "TOP-response", "name": "性反応", "parent": "TOP-genital", "description": "血流・自律神経・ホルモン・オーガズム"}
+]

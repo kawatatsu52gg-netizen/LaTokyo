@@ -102,9 +102,29 @@ python -m src.pipeline run-all   # ingest→load-verified→build-quiz→status
 python -m src.pipeline status
 ```
 
+## Knowledge Base（テーマ別知識ベース＋ナレッジグラフ）
+「動画ごと」ではなく **テーマごと** に知識を蓄積します。複数の動画・論文・教科書を
+1つのテーマ（例: 女性器）に紐づけ、エンティティ間をグラフで結び、4種のクイズを自動生成します。
+設計の全体像・ER図・スケール方針は [docs/KB_DESIGN.md](docs/KB_DESIGN.md)。
+
+```bash
+python -m src.pipeline kb-build            # シード(topics/entities/edges/claims/論文・教科書)→ kb.db 統合
+python -m src.pipeline kb-stats            # KB統計(ソース種別/エンティティ/エッジ/エビデンス)
+python -m src.pipeline kb-generate A       # Evidence A のグラフから4種クイズを自動生成(draft)
+python -m src.pipeline kb-generate A TOP-innervation   # テーマ限定生成も可
+```
+- 生成物は `data/quizzes/kb_generated/`（**draft・未承認**）。QA/採点/承認は既存フローを通します。
+- グラフの例: 陰核亀頭 →(innervated_by) 陰核背神経 →(branch_of) 陰部神経 →(originates_from) S2〜S4。
+- 4種: `fill_blank`（穴埋め）/ `multiple_choice`（4択）/ `application`（多段応用）/ `case`（ケース）。
+- **Evidence A だけ** で生成でき、各クイズは裏付け `claim_ids` と複数 `source_ids`（動画＋論文＋教科書）に追跡可能。
+
+### KBに追加した項目
+Topic / Sub Topic（topics階層）、Anatomy / Nerve / Receptor / Muscle / Hormone / Clinical（entities.etype）、
+Evidence（claims/edges の evidence_level）、Source（youtube/paper/textbook）。
+
 ## テスト
 ```bash
-python -m unittest -v tests.test_pipeline
+python -m unittest -v tests.test_pipeline tests.test_kb
 ```
 
 ## ディレクトリ

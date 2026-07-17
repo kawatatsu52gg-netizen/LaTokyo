@@ -1,0 +1,158 @@
+[
+  {
+    "claim_id": "CLM-3001", "topic_id": "TOP-external", "evidence_level": "A", "verification_status": "verified",
+    "statement": "陰核は亀頭・陰核体・脚・前庭球からなる複合体である。",
+    "entities": ["ENT-clitoris", "ENT-clitoris-glans", "ENT-clitoris-crus", "ENT-vestibular-bulb"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "第X章 外生殖器", "source_evidence": "A", "quote": "The clitoris comprises glans, body, crura and vestibular bulbs."},
+      {"source_id": "PAP-0001", "locator": "Fig.2", "source_evidence": "A", "quote": "MRI shows the clitoral complex."},
+      {"source_id": "SRC-0002", "locator": "02:10", "source_evidence": "B", "quote": "陰核は…複合体である。"}
+    ],
+    "review_notes": "教科書＋論文＋動画の3ソースで一致(Evidence統合→A)。"
+  },
+  {
+    "claim_id": "CLM-3002", "topic_id": "TOP-innervation", "evidence_level": "A", "verification_status": "verified",
+    "statement": "陰核背神経は陰部神経の終枝である。",
+    "entities": ["ENT-dn-clitoris", "ENT-pudendal"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "神経支配", "source_evidence": "A", "quote": "The dorsal nerve of the clitoris is the terminal branch of the pudendal nerve."},
+      {"source_id": "SRC-0002", "locator": "04:20", "source_evidence": "B", "quote": "陰核背神経は陰部神経の終枝であり…"}
+    ],
+    "review_notes": "教科書で確立。"
+  },
+  {
+    "claim_id": "CLM-3003", "topic_id": "TOP-innervation", "evidence_level": "A", "verification_status": "verified",
+    "statement": "陰部神経は仙骨神経叢(S2〜S4)に由来する。",
+    "entities": ["ENT-pudendal", "ENT-s2s4"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "仙骨神経叢", "source_evidence": "A", "quote": "The pudendal nerve arises from S2–S4."},
+      {"source_id": "SRC-0001", "locator": "07:15", "source_evidence": "B", "quote": "陰部神経はS2–S4に由来し…"}
+    ],
+    "review_notes": "神経解剖の確立事項。"
+  },
+  {
+    "claim_id": "CLM-3004", "topic_id": "TOP-innervation", "evidence_level": "A", "verification_status": "verified",
+    "statement": "陰核亀頭の感覚は主に陰核背神経が伝える。",
+    "entities": ["ENT-clitoris-glans", "ENT-dn-clitoris"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "感覚神経", "source_evidence": "A", "quote": "Sensation of the glans clitoris is carried by the dorsal nerve of the clitoris."},
+      {"source_id": "PAP-0001", "locator": "p.3", "source_evidence": "A", "quote": "Dense innervation via dorsal nerve."}
+    ],
+    "review_notes": "教科書＋論文で一致。"
+  },
+  {
+    "claim_id": "CLM-3005", "topic_id": "TOP-innervation", "evidence_level": "A", "verification_status": "verified",
+    "statement": "骨盤内臓神経は副交感性で、仙髄(S2〜S4)に由来する。",
+    "entities": ["ENT-pelvic-splanchnic", "ENT-parasympathetic", "ENT-s2s4"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "自律神経", "source_evidence": "A", "quote": "Pelvic splanchnic nerves (parasympathetic) arise from S2–S4."},
+      {"source_id": "PAP-0002", "locator": "p.5", "source_evidence": "B", "quote": "Parasympathetic outflow drives genital vasodilation."}
+    ],
+    "review_notes": "確立。副交感=nervi erigentes。"
+  },
+  {
+    "claim_id": "CLM-3006", "topic_id": "TOP-innervation", "evidence_level": "B", "verification_status": "verified",
+    "statement": "下腹神経は交感性で、オーガズム期などの反応に関与する。",
+    "entities": ["ENT-hypogastric", "ENT-sympathetic"],
+    "sources": [
+      {"source_id": "PAP-0002", "locator": "p.6", "source_evidence": "B", "quote": "Sympathetic hypogastric contribution during orgasm phase."},
+      {"source_id": "SRC-0002", "locator": "06:05", "source_evidence": "B", "quote": "交感性の下腹神経が関与する。"}
+    ],
+    "review_notes": "自律神経の二相性。"
+  },
+  {
+    "claim_id": "CLM-3007", "topic_id": "TOP-receptor", "evidence_level": "A", "verification_status": "verified",
+    "statement": "Pacinian小体は高周波の振動に反応し、皮膚の深部に分布する。",
+    "entities": ["ENT-pacinian", "ENT-vibration"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "感覚受容器", "source_evidence": "A", "quote": "Pacinian corpuscles respond to high-frequency vibration; located deep."},
+      {"source_id": "SRC-0001", "locator": "09:40", "source_evidence": "B", "quote": "Pacinian小体は高周波の振動…"}
+    ],
+    "review_notes": "感覚生理の確立事項。"
+  },
+  {
+    "claim_id": "CLM-3008", "topic_id": "TOP-receptor", "evidence_level": "A", "verification_status": "verified",
+    "statement": "Meissner小体は軽い接触・低周波振動に反応し、皮膚の浅い層に分布する。",
+    "entities": ["ENT-meissner", "ENT-light-touch"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "感覚受容器", "source_evidence": "A", "quote": "Meissner corpuscles respond to light touch; superficial."}
+    ],
+    "review_notes": "確立。"
+  },
+  {
+    "claim_id": "CLM-3009", "topic_id": "TOP-receptor", "evidence_level": "A", "verification_status": "verified",
+    "statement": "Merkel細胞は持続圧やエッジ・形の識別に働き、表皮基底に分布する。",
+    "entities": ["ENT-merkel", "ENT-pressure"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "感覚受容器", "source_evidence": "A", "quote": "Merkel cells: sustained pressure, form/edges; basal epidermis."}
+    ],
+    "review_notes": "確立。"
+  },
+  {
+    "claim_id": "CLM-3010", "topic_id": "TOP-receptor", "evidence_level": "A", "verification_status": "verified",
+    "statement": "Ruffini終末は皮膚の伸張に反応する遅順応性の受容器である。",
+    "entities": ["ENT-ruffini", "ENT-stretch"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "感覚受容器", "source_evidence": "A", "quote": "Ruffini endings: skin stretch, slowly adapting."}
+    ],
+    "review_notes": "確立。"
+  },
+  {
+    "claim_id": "CLM-3011", "topic_id": "TOP-external", "evidence_level": "A", "verification_status": "verified",
+    "statement": "陰核は発生学的に陰茎と相同である。",
+    "entities": ["ENT-clitoris", "ENT-penis"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "発生", "source_evidence": "A", "quote": "Clitoris is homologous to the penis (genital tubercle)."},
+      {"source_id": "SRC-0001", "locator": "06:02", "source_evidence": "B", "quote": "陰核と陰茎は相同で…"}
+    ],
+    "review_notes": "発生学の確立事項。"
+  },
+  {
+    "claim_id": "CLM-3012", "topic_id": "TOP-external", "evidence_level": "A", "verification_status": "verified",
+    "statement": "大陰唇は発生学的に陰嚢と相同である。",
+    "entities": ["ENT-labia-majora", "ENT-scrotum"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "発生", "source_evidence": "A", "quote": "Labia majora are homologous to the scrotum."}
+    ],
+    "review_notes": "確立。"
+  },
+  {
+    "claim_id": "CLM-3013", "topic_id": "TOP-external", "evidence_level": "A", "verification_status": "verified",
+    "statement": "スキーン腺(傍尿道腺)は前立腺と相同で、女性前立腺とも呼ばれる。",
+    "entities": ["ENT-skene", "ENT-prostate"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "傍尿道腺", "source_evidence": "A", "quote": "Skene glands are homologous to the prostate (female prostate)."}
+    ],
+    "review_notes": "Terminologia で prostata feminina 採用。"
+  },
+  {
+    "claim_id": "CLM-3014", "topic_id": "TOP-pelvicfloor", "evidence_level": "A", "verification_status": "verified",
+    "statement": "オーガズム時には球海綿体筋などの骨盤底筋が律動的に収縮する。",
+    "entities": ["ENT-bulbospongiosus", "ENT-pelvic-floor"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "骨盤底", "source_evidence": "A", "quote": "Rhythmic contractions of bulbospongiosus at orgasm."},
+      {"source_id": "SRC-0002", "locator": "08:30", "source_evidence": "B", "quote": "骨盤底筋が律動的に収縮する。"}
+    ],
+    "review_notes": "確立。約0.8秒間隔。"
+  },
+  {
+    "claim_id": "CLM-3015", "topic_id": "TOP-pelvicfloor", "evidence_level": "B", "verification_status": "verified",
+    "statement": "骨盤底筋の過緊張は性交痛(ディスパレウニア)の一因になりうる。",
+    "entities": ["ENT-pf-hypertonicity", "ENT-dyspareunia", "ENT-pelvic-floor"],
+    "sources": [
+      {"source_id": "PAP-0002", "locator": "p.8", "source_evidence": "B", "quote": "Pelvic floor hypertonicity is associated with dyspareunia."},
+      {"source_id": "SRC-0002", "locator": "09:10", "source_evidence": "B", "quote": "骨盤底筋の過緊張は性交痛の一因になりうる。"}
+    ],
+    "review_notes": "臨床的に支持。治療効果の断定は不可。"
+  },
+  {
+    "claim_id": "CLM-3016", "topic_id": "TOP-external", "evidence_level": "A", "verification_status": "verified",
+    "statement": "女性の尿道は約3〜4cmと短く、尿路感染症が起きやすい解剖学的要因になる。",
+    "entities": ["ENT-urethra", "ENT-uti"],
+    "sources": [
+      {"source_id": "TXT-0001", "locator": "尿道", "source_evidence": "A", "quote": "The female urethra is short (3–4 cm), predisposing to UTI."},
+      {"source_id": "SRC-0001", "locator": "03:20", "source_evidence": "B", "quote": "女性の尿道は約3〜4cmと短く…"}
+    ],
+    "review_notes": "確立。"
+  }
+]

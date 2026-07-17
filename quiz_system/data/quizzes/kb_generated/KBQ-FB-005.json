@@ -1,0 +1,34 @@
+{
+  "quiz_id": "KBQ-FB-005",
+  "quiz_type": "fill_blank",
+  "chapter": 3,
+  "level": 1,
+  "question": "陰部神経が由来する脊髄分節は【　】である。",
+  "choices": {
+    "A": "L1〜L2",
+    "B": "T11〜L2",
+    "C": "S2〜S4",
+    "D": "C5〜T1"
+  },
+  "correct_answer": "C",
+  "explanation": "陰部神経—(originates_from)→S2〜S4。S2-S4(仙骨神経叢)。",
+  "choice_explanations": {
+    "A": "この関係にはあてはまりません。",
+    "B": "この関係にはあてはまりません。",
+    "C": "正しい。陰部神経—(originates_from)→S2〜S4。S2-S4(仙骨神経叢",
+    "D": "この関係にはあてはまりません。"
+  },
+  "practical_point": "知識同士のつながり(グラフ)で理解すると記憶に残りやすい。",
+  "individual_variation_note": "解剖・神経の基本構造は共通だが、感受性や反応には個人差がある。",
+  "consent_note": "",
+  "source_ids": [
+    "SRC-0001",
+    "TXT-0001"
+  ],
+  "claim_ids": [
+    "CLM-3003"
+  ],
+  "evidence_level": "A",
+  "needs_verification": "グラフ自動生成。人間の医学的確認前(draft)。",
+  "review_status": "draft"
+}

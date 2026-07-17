@@ -1,0 +1,34 @@
+{
+  "quiz_id": "KBQ-MC-008",
+  "quiz_type": "multiple_choice",
+  "chapter": 3,
+  "level": 2,
+  "question": "骨盤内臓神経が由来する脊髄分節は【　】である。（正しいものを選べ）",
+  "choices": {
+    "A": "S2〜S4",
+    "B": "L1〜L2",
+    "C": "T11〜L2",
+    "D": "C5〜T1"
+  },
+  "correct_answer": "A",
+  "explanation": "骨盤内臓神経—(originates_from)→S2〜S4。仙髄由来。",
+  "choice_explanations": {
+    "A": "正しい。骨盤内臓神経—(originates_from)→S2〜S4。仙髄由来。",
+    "B": "この関係にはあてはまりません。",
+    "C": "この関係にはあてはまりません。",
+    "D": "この関係にはあてはまりません。"
+  },
+  "practical_point": "知識同士のつながり(グラフ)で理解すると記憶に残りやすい。",
+  "individual_variation_note": "解剖・神経の基本構造は共通だが、感受性や反応には個人差がある。",
+  "consent_note": "",
+  "source_ids": [
+    "PAP-0002",
+    "TXT-0001"
+  ],
+  "claim_ids": [
+    "CLM-3005"
+  ],
+  "evidence_level": "A",
+  "needs_verification": "グラフ自動生成。人間の医学的確認前(draft)。",
+  "review_status": "draft"
+}

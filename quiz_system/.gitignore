@@ -2,6 +2,8 @@
 .env
 data/database/*.db
 data/database/*.db-journal
+data/database/*.db-wal
+data/database/*.db-shm
 __pycache__/
 *.pyc
 # 生成された成果物（サンプルは別途 tests/fixtures に置く）

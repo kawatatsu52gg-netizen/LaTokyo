@@ -1,0 +1,53 @@
+[
+  {"entity_id": "ENT-clitoris", "etype": "anatomy", "name": "陰核", "reading": "いんかく", "aliases": ["クリトリス", "clitoris"], "topic_id": "TOP-external", "attributes": {"function": "感覚・勃起(充血)", "sex": "female"}},
+  {"entity_id": "ENT-clitoris-glans", "etype": "anatomy", "name": "陰核亀頭", "aliases": ["glans clitoris"], "topic_id": "TOP-external", "attributes": {"function": "感覚"}},
+  {"entity_id": "ENT-clitoris-crus", "etype": "anatomy", "name": "陰核脚", "aliases": ["crus", "クルラ"], "topic_id": "TOP-external", "attributes": {}},
+  {"entity_id": "ENT-vestibular-bulb", "etype": "anatomy", "name": "前庭球", "aliases": ["vestibular bulb"], "topic_id": "TOP-external", "attributes": {}},
+  {"entity_id": "ENT-labia-majora", "etype": "anatomy", "name": "大陰唇", "aliases": [], "topic_id": "TOP-external", "attributes": {}},
+  {"entity_id": "ENT-labia-minora", "etype": "anatomy", "name": "小陰唇", "aliases": [], "topic_id": "TOP-external", "attributes": {}},
+  {"entity_id": "ENT-vestibule", "etype": "anatomy", "name": "腟前庭", "aliases": ["vestibule", "前庭"], "topic_id": "TOP-external", "attributes": {"origin": "泌尿生殖洞"}},
+  {"entity_id": "ENT-vagina", "etype": "anatomy", "name": "膣", "aliases": ["腟", "vagina"], "topic_id": "TOP-internal", "attributes": {}},
+  {"entity_id": "ENT-uterus", "etype": "anatomy", "name": "子宮", "aliases": ["uterus"], "topic_id": "TOP-internal", "attributes": {}},
+  {"entity_id": "ENT-ovary", "etype": "anatomy", "name": "卵巣", "aliases": ["ovary"], "topic_id": "TOP-internal", "attributes": {}},
+  {"entity_id": "ENT-urethra", "etype": "anatomy", "name": "尿道", "aliases": ["urethra"], "topic_id": "TOP-external", "attributes": {"length_cm": "3-4"}},
+  {"entity_id": "ENT-skene", "etype": "anatomy", "name": "スキーン腺", "aliases": ["傍尿道腺", "Skene腺", "女性前立腺"], "topic_id": "TOP-external", "attributes": {}},
+  {"entity_id": "ENT-bartholin", "etype": "anatomy", "name": "バルトリン腺", "aliases": ["大前庭腺"], "topic_id": "TOP-external", "attributes": {}},
+
+  {"entity_id": "ENT-penis", "etype": "anatomy", "name": "陰茎", "aliases": ["ペニス", "penis"], "topic_id": "TOP-external", "attributes": {"sex": "male"}},
+  {"entity_id": "ENT-scrotum", "etype": "anatomy", "name": "陰嚢", "aliases": ["scrotum"], "topic_id": "TOP-external", "attributes": {"sex": "male"}},
+  {"entity_id": "ENT-prostate", "etype": "anatomy", "name": "前立腺", "aliases": ["prostate"], "topic_id": "TOP-external", "attributes": {"sex": "male"}},
+
+  {"entity_id": "ENT-pudendal", "etype": "nerve", "name": "陰部神経", "aliases": ["pudendal nerve"], "topic_id": "TOP-innervation", "attributes": {"modality": "体性(感覚・運動)"}},
+  {"entity_id": "ENT-dn-clitoris", "etype": "nerve", "name": "陰核背神経", "aliases": ["dorsal nerve of clitoris"], "topic_id": "TOP-innervation", "attributes": {"modality": "感覚"}},
+  {"entity_id": "ENT-pelvic-splanchnic", "etype": "nerve", "name": "骨盤内臓神経", "aliases": ["pelvic splanchnic", "nervi erigentes"], "topic_id": "TOP-innervation", "attributes": {"modality": "副交感"}},
+  {"entity_id": "ENT-hypogastric", "etype": "nerve", "name": "下腹神経", "aliases": ["hypogastric nerve"], "topic_id": "TOP-innervation", "attributes": {"modality": "交感"}},
+  {"entity_id": "ENT-vagus", "etype": "nerve", "name": "迷走神経", "aliases": ["vagus"], "topic_id": "TOP-innervation", "attributes": {}},
+
+  {"entity_id": "ENT-s2s4", "etype": "spinal_segment", "name": "S2〜S4", "aliases": ["仙骨神経叢", "sacral", "S2-S4"], "topic_id": "TOP-innervation", "attributes": {}},
+  {"entity_id": "ENT-parasympathetic", "etype": "autonomic", "name": "副交感神経", "aliases": ["parasympathetic"], "topic_id": "TOP-innervation", "attributes": {"role": "興奮期の血管拡張"}},
+  {"entity_id": "ENT-sympathetic", "etype": "autonomic", "name": "交感神経", "aliases": ["sympathetic"], "topic_id": "TOP-innervation", "attributes": {"role": "オーガズム期の関与"}},
+
+  {"entity_id": "ENT-pacinian", "etype": "receptor", "name": "Pacinian小体", "aliases": ["パチニ小体", "パチニ", "pacinian"], "topic_id": "TOP-receptor", "attributes": {"adapt": "速順応", "layer": "深部"}},
+  {"entity_id": "ENT-meissner", "etype": "receptor", "name": "Meissner小体", "aliases": ["マイスネル小体", "マイスナー"], "topic_id": "TOP-receptor", "attributes": {"adapt": "速順応", "layer": "浅部"}},
+  {"entity_id": "ENT-merkel", "etype": "receptor", "name": "Merkel細胞", "aliases": ["メルケル細胞"], "topic_id": "TOP-receptor", "attributes": {"adapt": "遅順応", "layer": "表皮基底"}},
+  {"entity_id": "ENT-ruffini", "etype": "receptor", "name": "Ruffini終末", "aliases": ["ルフィニ終末"], "topic_id": "TOP-receptor", "attributes": {"adapt": "遅順応"}},
+  {"entity_id": "ENT-free-nerve", "etype": "receptor", "name": "自由神経終末", "aliases": ["free nerve ending"], "topic_id": "TOP-receptor", "attributes": {}},
+
+  {"entity_id": "ENT-pelvic-floor", "etype": "muscle", "name": "骨盤底筋", "aliases": ["pelvic floor"], "topic_id": "TOP-pelvicfloor", "attributes": {}},
+  {"entity_id": "ENT-levator-ani", "etype": "muscle", "name": "肛門挙筋", "aliases": ["levator ani"], "topic_id": "TOP-pelvicfloor", "attributes": {}},
+  {"entity_id": "ENT-bulbospongiosus", "etype": "muscle", "name": "球海綿体筋", "aliases": ["bulbospongiosus"], "topic_id": "TOP-pelvicfloor", "attributes": {}},
+  {"entity_id": "ENT-puborectalis", "etype": "muscle", "name": "恥骨直腸筋", "aliases": ["puborectalis"], "topic_id": "TOP-pelvicfloor", "attributes": {}},
+
+  {"entity_id": "ENT-estrogen", "etype": "hormone", "name": "エストロゲン", "aliases": ["estrogen"], "topic_id": "TOP-response", "attributes": {}},
+  {"entity_id": "ENT-oxytocin", "etype": "hormone", "name": "オキシトシン", "aliases": ["oxytocin"], "topic_id": "TOP-response", "attributes": {}},
+  {"entity_id": "ENT-dopamine", "etype": "hormone", "name": "ドーパミン", "aliases": ["dopamine"], "topic_id": "TOP-response", "attributes": {}},
+
+  {"entity_id": "ENT-uti", "etype": "clinical", "name": "尿路感染症", "aliases": ["UTI", "膀胱炎"], "topic_id": "TOP-external", "attributes": {}},
+  {"entity_id": "ENT-dyspareunia", "etype": "clinical", "name": "性交痛", "aliases": ["ディスパレウニア", "dyspareunia"], "topic_id": "TOP-pelvicfloor", "attributes": {}},
+  {"entity_id": "ENT-pf-hypertonicity", "etype": "clinical", "name": "骨盤底過緊張", "aliases": ["pelvic floor hypertonicity"], "topic_id": "TOP-pelvicfloor", "attributes": {}},
+
+  {"entity_id": "ENT-light-touch", "etype": "stimulus", "name": "軽い接触", "aliases": [], "topic_id": "TOP-receptor", "attributes": {}},
+  {"entity_id": "ENT-vibration", "etype": "stimulus", "name": "振動", "aliases": [], "topic_id": "TOP-receptor", "attributes": {}},
+  {"entity_id": "ENT-pressure", "etype": "stimulus", "name": "持続圧", "aliases": [], "topic_id": "TOP-receptor", "attributes": {}},
+  {"entity_id": "ENT-stretch", "etype": "stimulus", "name": "皮膚伸張", "aliases": [], "topic_id": "TOP-receptor", "attributes": {}}
+]
