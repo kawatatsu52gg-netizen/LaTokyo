@@ -7,7 +7,7 @@
     "dev": "node scripts/dev.js",
     "start": "node scripts/dev.js",
     "bootstrap": "node scripts/dev.js --bootstrap-only",
-    "test": "python3 -m unittest tests.test_pipeline tests.test_kb tests.test_content tests.test_dashboard tests.test_research tests.test_beginner tests.test_empathy"
+    "test": "python3 -m unittest tests.test_pipeline tests.test_kb tests.test_content tests.test_dashboard tests.test_research tests.test_beginner tests.test_empathy tests.test_goals"
   },
   "engines": {
     "node": ">=18"

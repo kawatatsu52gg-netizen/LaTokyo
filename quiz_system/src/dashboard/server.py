@@ -70,6 +70,9 @@ class Handler(BaseHTTPRequestHandler):
             if u.path == "/api/research":
                 from ..research import team
                 return self._send(team.run_daily())
+            if u.path == "/api/goals":
+                from ..content.goals import audit
+                return self._send(audit())
             return self._send({"error": "not found"}, 404)
         except Exception as e:
             return self._send({"error": str(e)}, 500)

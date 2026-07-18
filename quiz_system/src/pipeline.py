@@ -406,6 +406,34 @@ def cmd_research_design(subject: str) -> None:
     log(f"research-design 完了: {subject} → {r['count']}形式")
 
 
+def cmd_goals_audit() -> None:
+    """全コンテンツが最終ゴール(卒業6能力)に貢献しているか監査する。"""
+    from .content.goals import audit
+    a = audit()
+    log(f"=== ゴール貢献度監査 ===  整合率 {a['alignment_pct']}%（{a['aligned_items']}/{a['total_items']}）")
+    log(f"ミッション: {a['mission']}")
+    log("能力別カバレッジ:")
+    names = {c["id"]: c["name"] for c in a["competencies"]}
+    for gid, n in a["competency_coverage"].items():
+        log(f"  {gid} {names.get(gid,'')}: {n}件")
+    if a["flagged"]:
+        log(f"⚠️ 要対応 {len(a['flagged'])}件:")
+        for x in a["flagged"][:50]:
+            log(f"  [{x['kind']}] {x['id']} — {x['reason']} (hits={x['hits']})")
+    else:
+        log("✅ 非貢献コンテンツはありません。")
+    rep = ROOT / "data" / "reports" / "goals_audit.md"
+    rep.parent.mkdir(parents=True, exist_ok=True)
+    lines = [f"# ゴール貢献度監査  整合率 {a['alignment_pct']}%", "",
+             f"> {a['mission']}", "", "## 能力別カバレッジ"]
+    lines += [f"- {gid} {names.get(gid,'')}: {n}件" for gid, n in a["competency_coverage"].items()]
+    lines += ["", "## 要対応（非貢献 or 必須未充足）"]
+    lines += ([f"- [{x['kind']}] {x['id']} — {x['reason']}（hits={x['hits']}）" for x in a["flagged"]]
+              or ["- なし ✅"])
+    rep.write_text("\n".join(lines), encoding="utf-8")
+    log(f"  レポート: {rep}")
+
+
 def cmd_beginner_course() -> None:
     """初心者向け3レベル学習コース(平易化・図解前提・ゲーム用)を生成。"""
     from .content.beginner import write_course_files
@@ -564,6 +592,7 @@ COMMANDS = {
     "kb-stats": cmd_kb_stats,
     "content-list": cmd_content_list,
     "beginner-course": cmd_beginner_course,
+    "goals-audit": cmd_goals_audit,
     "research": cmd_research,
     "status": cmd_status,
     "run-all": cmd_run_all,

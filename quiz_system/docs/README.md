@@ -1,5 +1,8 @@
 # ドキュメント目次
 
+## 最終ゴール（まず読む）
+- **[LEARNING_GOALS.md](LEARNING_GOALS.md)** — 卒業6能力・コンテンツ対応・貢献度監査（`goals-audit`）
+
 ## 運用（まずここから）
 - **[DASHBOARD.md](DASHBOARD.md)** — 医学コンテンツ制作OS（ブラウザDashboard）UIモック/画面遷移/技術構成/実装順序。`python -m src.pipeline dashboard` で起動
 - **[OPERATIONS_MANUAL.md](OPERATIONS_MANUAL.md)** — 第三者スタッフ向け運用マニュアル（役割・コマンド早見・トラブル対応・用語集）

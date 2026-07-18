@@ -69,6 +69,18 @@ def _collect_kb_quizzes() -> list[dict]:
     return uniq
 
 
+# 思いやる行動(ゴールG6)を必ず含めるための語
+_CARE_WORDS = ("尊重", "思いやり", "相手の気持ち", "いやがる", "我慢", "無理", "受診")
+
+
+def _respect_note(q: dict) -> str:
+    """各問に『知識→思いやる行動』を必ず添える（学習ゴールG6を保証）。"""
+    note = q.get("consent_note", "") or "大切なのは、相手の気持ちを聞いて、いやがることはしないこと。"
+    if not any(w in note for w in _CARE_WORDS):
+        note = note.rstrip("。") + "。相手を尊重し、いやがることはしません。"
+    return note
+
+
 def to_beginner_quiz(q: dict) -> dict:
     """KBクイズ1問を、初心者向け(平易・図解・尊重)に変換。1問1知識は維持。"""
     ch = q.get("chapter", 1)
@@ -84,8 +96,7 @@ def to_beginner_quiz(q: dict) -> dict:
                             or q.get("explanation", "")),
         "figure_hint": FIGURE_BY_CHAPTER.get(ch, "関係する部分をやさしく示すイラスト。"),
         "one_point": to_plain(q.get("individual_variation_note", "")) or "人によってちがいます。",
-        "respect_note": q.get("consent_note", "") or
-        "大切なのは、相手の気持ちを聞いて、いやがることはしないこと。",
+        "respect_note": _respect_note(q),
         "source_ids": q.get("source_ids", []),
         "evidence_level": q.get("evidence_level", ""),
     }

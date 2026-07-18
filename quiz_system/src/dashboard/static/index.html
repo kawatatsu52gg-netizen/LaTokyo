@@ -190,7 +190,21 @@ async function renderDashboard(){
       ${card('KB最終更新', s.kb_last_build, true)}
     </div>
     <p class="muted">Evidence内訳: ${Object.entries(s.kb.evidence||{}).map(([k,v])=>k+':'+v).join('  ')}
-      ／ Source種別: ${Object.entries(s.kb.sources_by_type||{}).map(([k,v])=>k+':'+v).join('  ')}</p>`;
+      ／ Source種別: ${Object.entries(s.kb.sources_by_type||{}).map(([k,v])=>k+':'+v).join('  ')}</p>
+    <h2>🎯 最終ゴール貢献度（卒業6能力）</h2>
+    <div id="goalbox" class="muted">監査中…</div>`;
+  const g = await api.get('/api/goals');
+  const names = {G1:'基本構造を説明',G2:'個人差の理解',G3:'心理・環境・体調',G4:'安心して会話',G5:'決めつけず聞く',G6:'思いやる行動'};
+  const cov = g.competency_coverage||{};
+  $('goalbox').innerHTML =
+    `<div class="qcard"><b>整合率 ${g.alignment_pct}%</b>（${g.aligned_items}/${g.total_items}）
+      ${g.flagged&&g.flagged.length?`<span class="pill D">要対応 ${g.flagged.length}</span>`:`<span class="pill A">非貢献なし ✅</span>`}
+      <div class="grid" style="margin-top:10px">
+        ${Object.keys(names).map(k=>card(names[k],(cov[k]||0)+'件',true)).join('')}
+      </div>
+      <p class="muted">${esc(g.mission||'')}</p>
+      ${(g.flagged||[]).slice(0,10).map(x=>`<div class="choice">[${esc(x.kind)}] ${esc(x.id)} — ${esc(x.reason)}</div>`).join('')}
+    </div>`;
 }
 
 async function renderWorkflow(){
