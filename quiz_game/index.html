@@ -1,0 +1,530 @@
+<title>EPSクエスト — Lesson 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  /* ===== トークン：夜のマーケット端末 × RPGクエスト（ダーク確定の世界観） ===== */
+  :root{
+    color-scheme: dark;
+    --ink:      #0B1020;   /* 深い紺の地 */
+    --ink-2:    #0E1526;
+    --panel:    #141C31;   /* カード */
+    --panel-2:  #1B2540;
+    --line:     #26314f;   /* 罫線 */
+    --text:     #E7ECF7;   /* 主文字（青み寄りの白） */
+    --muted:    #8B96B2;   /* 副文字（紺寄りグレー＝選んだ中立色） */
+    --gold:     #F5C451;   /* XP・報酬 */
+    --gold-dim: #a9863a;
+    --bull:     #3DDC84;   /* 正解・上昇 */
+    --bull-2:   #2FB56A;
+    --bear:     #FF6B6B;   /* 不正解・下落 */
+    --cyan:     #57C7EB;   /* 図解の補助線 */
+
+    --r: 16px;
+    --r-sm: 11px;
+    --shadow: 0 10px 30px rgba(0,0,0,.45);
+    --font: "Hiragino Sans","Hiragino Kaku Gothic ProN",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    --mono: ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; }
+  body{
+    font-family: var(--font);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #16223f 0, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(87,199,235,.06), transparent 55%),
+      radial-gradient(900px 600px at 0% 20%, rgba(245,196,81,.05), transparent 55%),
+      var(--ink);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app{
+    width: 100%; max-width: 560px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 0 16px calc(28px + env(safe-area-inset-bottom));
+  }
+
+  /* ===== HUD（レベル・XP・バッジ） ===== */
+  .hud{
+    position: sticky; top: 0; z-index: 5;
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: center; gap: 12px;
+    padding: 14px 4px 12px;
+    background: linear-gradient(var(--ink) 72%, transparent);
+  }
+  .lv{
+    display: grid; place-items: center;
+    width: 46px; height: 46px; border-radius: 13px;
+    background: linear-gradient(160deg,var(--panel-2),var(--panel));
+    border: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    line-height: 1;
+  }
+  .lv b{ font-family: var(--mono); font-size: 19px; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .lv span{ display:block; font-size: 8.5px; letter-spacing:.18em; color: var(--muted); margin-top:2px; }
+
+  .xpwrap{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .xprow{ display:flex; justify-content:space-between; align-items:baseline; font-size:11px; }
+  .xprow .k{ letter-spacing:.16em; color:var(--muted); }
+  .xprow .v{ font-family:var(--mono); color:var(--gold); font-variant-numeric:tabular-nums; }
+  .bar{ height:9px; border-radius:99px; background:#0a1122; border:1px solid var(--line); overflow:hidden; }
+  .bar > i{
+    display:block; height:100%; width:0%;
+    background: linear-gradient(90deg,var(--gold-dim),var(--gold));
+    box-shadow: 0 0 12px rgba(245,196,81,.5);
+    transition: width .6s cubic-bezier(.22,1,.36,1);
+  }
+  .badges{ display:flex; gap:6px; }
+  .badge{
+    width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
+    background: var(--panel); border:1px solid var(--line); font-size:16px;
+    filter: grayscale(1) opacity(.35); transition: transform .3s, filter .4s;
+  }
+  .badge.on{ filter:none; border-color: var(--gold-dim); box-shadow:0 0 0 1px var(--gold-dim), 0 0 14px rgba(245,196,81,.25); }
+  .badge.pop{ animation: pop .5s cubic-bezier(.22,1.4,.4,1); }
+
+  /* ===== 画面共通 ===== */
+  .screen{ flex:1; display:flex; flex-direction:column; gap:16px; padding-top:6px; }
+  .hidden{ display:none !important; }
+  .eyebrow{ font-size:11px; letter-spacing:.26em; color:var(--cyan); text-transform:uppercase; }
+  h1{ font-size: clamp(26px,7vw,34px); line-height:1.1; margin:6px 0 0; text-wrap:balance; letter-spacing:-.01em; }
+  h2{ font-size: clamp(19px,5vw,23px); margin:0; text-wrap:balance; }
+  p{ margin:0; color: var(--text); line-height:1.7; font-size:15px; }
+  .muted{ color: var(--muted); }
+
+  .card{
+    background: linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line); border-radius: var(--r);
+    padding: 20px; box-shadow: var(--shadow);
+    display:flex; flex-direction:column; gap:14px;
+  }
+
+  /* ボタン */
+  .btn{
+    font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;
+    border:none; border-radius: var(--r-sm); padding:15px 18px; width:100%;
+    color:#1b1405; background: linear-gradient(180deg,#ffd873,var(--gold));
+    box-shadow: 0 6px 18px rgba(245,196,81,.28); transition: transform .12s, filter .2s;
+  }
+  .btn:hover{ filter:brightness(1.06); } .btn:active{ transform: translateY(1px); }
+  .btn.ghost{
+    background: var(--panel); color: var(--text); border:1px solid var(--line);
+    box-shadow:none; font-weight:600;
+  }
+  :focus-visible{ outline: 2px solid var(--cyan); outline-offset:2px; }
+
+  /* ===== レッスンの図解 ===== */
+  .formula{
+    display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;
+    background:#0b1224; border:1px solid var(--line); border-radius:12px; padding:16px 10px;
+  }
+  .frac{ display:flex; flex-direction:column; align-items:center; line-height:1.25; }
+  .frac .top{ padding:0 8px 4px; border-bottom:2px solid var(--muted); font-size:14px; }
+  .frac .bot{ padding:6px 8px 0; font-size:14px; color:var(--muted); }
+  .eq{ font-family:var(--mono); font-size:22px; color:var(--muted); }
+  .res{ font-family:var(--mono); font-size:22px; color:var(--gold); font-weight:700; }
+
+  .charts{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .chart{ background:#0b1224; border:1px solid var(--line); border-radius:12px; padding:10px 8px 8px; text-align:center; }
+  .chart svg{ width:100%; height:52px; display:block; }
+  .chart .tag{ font-family:var(--mono); font-weight:700; font-size:15px; margin-top:6px; }
+  .chart small{ display:block; color:var(--muted); font-size:10.5px; margin-top:2px; line-height:1.3; }
+  .A{ color:var(--bull); } .B{ color:var(--gold); } .C{ color:var(--bear); }
+
+  .dots{ display:flex; gap:7px; justify-content:center; padding-top:2px; }
+  .dot{ width:8px; height:8px; border-radius:99px; background:var(--line); transition: background .3s, transform .3s; }
+  .dot.on{ background:var(--gold); transform:scale(1.15); }
+
+  /* ===== クイズ ===== */
+  .qmeta{ display:flex; justify-content:space-between; align-items:center; }
+  .chip{ font-family:var(--mono); font-size:12px; color:var(--muted); letter-spacing:.05em; }
+  .qtext{ font-size:18px; font-weight:700; line-height:1.55; text-wrap:balance; }
+  .choices{ display:flex; flex-direction:column; gap:10px; }
+  .choice{
+    text-align:left; font-family:inherit; font-size:15px; color:var(--text); cursor:pointer;
+    background: var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:14px 15px; display:flex; align-items:center; gap:12px; transition: border-color .15s, background .15s, transform .1s;
+  }
+  .choice:hover{ border-color:#3b4a72; }
+  .choice .key{
+    flex:none; width:26px; height:26px; border-radius:7px; display:grid; place-items:center;
+    background:var(--panel-2); border:1px solid var(--line); font-family:var(--mono); font-size:13px; color:var(--muted);
+  }
+  .choice:active{ transform:scale(.99); }
+  .choice.correct{ border-color:var(--bull); background:rgba(61,220,132,.12); }
+  .choice.correct .key{ background:var(--bull); color:#06210f; border-color:var(--bull); }
+  .choice.wrong{ border-color:var(--bear); background:rgba(255,107,107,.1); }
+  .choice.wrong .key{ background:var(--bear); color:#2a0808; border-color:var(--bear); }
+  .choice.dim{ opacity:.5; }
+  .choice[disabled]{ cursor:default; }
+
+  .feedback{
+    border-radius:12px; padding:14px 15px; font-size:14px; line-height:1.65;
+    border:1px solid var(--line); background:#0b1224; display:flex; gap:10px; align-items:flex-start;
+  }
+  .feedback .ic{ font-size:18px; line-height:1.2; }
+  .feedback.good{ border-color:var(--bull-2); } .feedback.good .ic{ color:var(--bull); }
+  .feedback.bad{ border-color:var(--bear); } .feedback.bad .ic{ color:var(--bear); }
+  .feedback b.gain{ color:var(--gold); font-family:var(--mono); }
+
+  /* ===== レベルアップ演出 ===== */
+  .overlay{
+    position:fixed; inset:0; z-index:20; display:grid; place-items:center;
+    background:rgba(6,9,18,.82); backdrop-filter: blur(3px);
+    animation: fade .25s ease;
+  }
+  .lvup{ text-align:center; position:relative; }
+  .lvup .burst{
+    width:190px; height:190px; margin:0 auto 6px; border-radius:50%;
+    background: radial-gradient(circle, rgba(245,196,81,.55), rgba(245,196,81,0) 62%);
+    display:grid; place-items:center; animation: burst .8s cubic-bezier(.22,1,.36,1);
+  }
+  .lvup .burst b{ font-family:var(--mono); font-size:60px; color:var(--gold); font-weight:800;
+    text-shadow:0 0 24px rgba(245,196,81,.7); font-variant-numeric:tabular-nums; }
+  .lvup .kick{ font-size:13px; letter-spacing:.34em; color:var(--gold); }
+  .lvup h2{ margin-top:4px; }
+
+  /* ===== クリア画面 ===== */
+  .result-hero{ text-align:center; display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .medal{ font-size:62px; animation: pop .6s cubic-bezier(.22,1.4,.4,1); }
+  .score{ font-family:var(--mono); font-size:44px; font-weight:800; color:var(--gold); font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+  .stars{ font-size:26px; letter-spacing:4px; }
+  .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat{ background:#0b1224; border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center; }
+  .stat .n{ font-family:var(--mono); font-size:22px; color:var(--text); font-variant-numeric:tabular-nums; }
+  .stat .l{ font-size:11px; color:var(--muted); letter-spacing:.1em; margin-top:3px; }
+  .earned{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .earned .e{ display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--gold-dim);
+    border-radius:99px; padding:8px 14px; font-size:13px; }
+  .earned .e .em{ font-size:17px; }
+
+  .foot{ text-align:center; font-size:11px; color:var(--muted); padding-top:6px; letter-spacing:.04em; }
+
+  @keyframes fade{ from{opacity:0} to{opacity:1} }
+  @keyframes pop{ 0%{transform:scale(.4);opacity:0} 60%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
+  @keyframes burst{ 0%{transform:scale(.5);opacity:0} 55%{transform:scale(1.08)} 100%{transform:scale(1);opacity:1} }
+  @keyframes riseIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+  .screen > *{ animation: riseIn .4s ease both; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+
+<div class="app">
+  <!-- HUD -->
+  <header class="hud">
+    <div class="lv"><b id="hudLv">1</b><span>LV</span></div>
+    <div class="xpwrap">
+      <div class="xprow"><span class="k">EXP</span><span class="v"><span id="xpNow">0</span> / <span id="xpNext">40</span></span></div>
+      <div class="bar"><i id="xpBar"></i></div>
+    </div>
+    <div class="badges">
+      <div class="badge" id="bd-step"  title="はじめの一歩">📖</div>
+      <div class="badge" id="bd-master" title="EPSマスター">🏆</div>
+      <div class="badge" id="bd-perfect" title="パーフェクト">🎯</div>
+    </div>
+  </header>
+
+  <!-- ① タイトル -->
+  <main class="screen" id="s-title">
+    <div style="flex:1"></div>
+    <div class="eyebrow">日本株ファンダメンタル分析</div>
+    <h1>EPSクエスト<br><span style="color:var(--gold)">Lesson 1</span> — 右肩上がりを見抜け</h1>
+    <p class="muted">「1株あたりの利益（EPS）」が長期で伸びている会社を、ゲームで学ぶ。3枚の図解を読んで、5問のクイズに挑戦しよう。</p>
+    <div class="card" style="gap:10px">
+      <div style="display:flex; gap:12px; align-items:center">
+        <span style="font-size:26px">🎮</span>
+        <div><b>あそび方</b><br><span class="muted" style="font-size:13px">図解を読む → クイズ5問 → 正解でEXP獲得 → レベルアップ＆バッジ！</span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="go('lesson')">クエスト開始 ▶</button>
+    <div style="flex:1"></div>
+    <div class="foot">Powered by あなたの分析ツール（stocks.txt駆動）</div>
+  </main>
+
+  <!-- ② レッスン -->
+  <main class="screen hidden" id="s-lesson">
+    <div class="eyebrow">Lesson 1 ・ 図解</div>
+    <h2 id="lsnTitle"></h2>
+    <div class="card" id="lsnCard"></div>
+    <div class="dots" id="lsnDots"></div>
+    <div style="display:flex; gap:10px">
+      <button class="btn ghost" id="lsnPrev" onclick="lessonNav(-1)" style="flex:0 0 40%">◀ 戻る</button>
+      <button class="btn" id="lsnNext" onclick="lessonNav(1)">次へ ▶</button>
+    </div>
+  </main>
+
+  <!-- ③ クイズ -->
+  <main class="screen hidden" id="s-quiz">
+    <div class="qmeta">
+      <span class="eyebrow">Quiz</span>
+      <span class="chip">Q<span id="qNum">1</span> / 5 ・ 正解 <span id="qCorrect">0</span></span>
+    </div>
+    <div class="card">
+      <div class="qtext" id="qText"></div>
+      <div class="choices" id="qChoices"></div>
+      <div class="feedback hidden" id="qFeed"></div>
+    </div>
+    <button class="btn hidden" id="qNext" onclick="nextQuestion()">次の問題 ▶</button>
+  </main>
+
+  <!-- ④ クリア -->
+  <main class="screen hidden" id="s-clear">
+    <div class="eyebrow" style="text-align:center">Lesson 1 Complete</div>
+    <div class="card">
+      <div class="result-hero">
+        <div class="medal" id="medal">🏆</div>
+        <div class="score"><span id="rScore">0</span>/5</div>
+        <div class="stars" id="rStars"></div>
+        <p class="muted" id="rMsg" style="text-align:center"></p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><div class="n">Lv <span id="rLv">1</span></div><div class="l">到達レベル</div></div>
+        <div class="stat"><div class="n" id="rXp">0</div><div class="l">獲得EXP</div></div>
+      </div>
+      <div>
+        <div class="muted" style="font-size:12px; letter-spacing:.1em; margin-bottom:8px; text-align:center">獲得バッジ</div>
+        <div class="earned" id="rBadges"></div>
+      </div>
+    </div>
+    <button class="btn" onclick="restart()">もう一度あそぶ ↻</button>
+    <div class="foot">次は Lesson 2「PER・ROEで会社の“質”を測る」（近日）</div>
+  </main>
+</div>
+
+<!-- レベルアップ演出 -->
+<div class="overlay hidden" id="lvOverlay" onclick="closeLvUp()">
+  <div class="lvup">
+    <div class="kick">LEVEL UP</div>
+    <div class="burst"><b id="lvBig">2</b></div>
+    <h2>レベル <span id="lvText">2</span> に上がった！</h2>
+    <p class="muted" style="font-size:13px">タップで続ける</p>
+  </div>
+</div>
+
+<script>
+  // ====== データ ======
+  const LESSON = [
+    {
+      title: "EPSってなに？",
+      html: `<p><b>EPS（1株当たり利益）</b>は、会社が<b>1株あたりでいくら稼いだか</b>を表す数字。投資でいちばん大事な体力メーターだ。</p>
+        <div class="formula">
+          <div class="frac"><div class="top">純利益</div><div class="bot">発行済株式数</div></div>
+          <span class="eq">=</span><span class="res">EPS</span>
+        </div>
+        <p class="muted" style="font-size:13px">例：利益100億円 ÷ 1億株 ＝ <b style="color:var(--gold)">EPS 100円</b>。数が大きいほど、1株の“稼ぐ力”が強い。</p>`
+    },
+    {
+      title: "なぜ“右肩上がり”が大事？",
+      html: `<p>EPSが<b>年々ふえている</b>会社は、稼ぐ力が育っている証拠。長期で株価もEPSについていきやすい。</p>
+        <div class="chart" style="padding:14px">
+          <svg viewBox="0 0 120 46" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="4,42 24,37 44,33 64,25 84,18 104,8 116,4" fill="none" stroke="var(--bull)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <small class="muted" style="font-size:12px">10年でEPSがきれいに伸びる＝理想形</small>
+        </div>
+        <p class="muted" style="font-size:13px">逆に、乱高下したり赤字がある会社は“景気まかせ”で読みにくい。</p>`
+    },
+    {
+      title: "3タイプで見分ける（A / B / C）",
+      html: `<p>あなたの分析ツールはEPSの形を<b>3段階</b>で自動判定する。この形を覚えれば勝てる。</p>
+        <div class="charts">
+          <div class="chart">
+            <svg viewBox="0 0 60 40"><polyline points="4,36 14,31 24,28 34,21 44,14 56,5" fill="none" stroke="var(--bull)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="tag A">A</div><small>ほぼ毎年増加。きれいな右肩上がり</small>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 60 40"><polyline points="4,20 14,12 24,30 34,24 44,12 56,4" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="tag B">B</div><small>途中で減益→回復し最高益を更新</small>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 60 40"><polyline points="4,10 14,34 24,8 34,36 44,12 56,30" fill="none" stroke="var(--bear)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="tag C">C</div><small>乱高下・赤字。右肩上がりでない</small>
+          </div>
+        </div>
+        <p class="muted" style="font-size:13px">この A / B / C が、次のクイズのカギになる。</p>`
+    }
+  ];
+
+  const QUIZ = [
+    { q:"EPS（1株当たり利益）の意味として正しいのは？",
+      choices:["会社が1株あたりで稼いだ利益","株の1株あたりの売買価格","1年間に支払う配当金の総額","会社が持つ土地の価値"],
+      answer:0, exp:"EPS＝会社が1株あたりで稼いだ利益。株の“稼ぐ力”を表す基本の数字です。" },
+    { q:"EPSの計算式はどれ？",
+      choices:["純利益 ÷ 発行済株式数","売上高 ÷ 株価","株価 ÷ 純利益","自己資本 ÷ 配当金"],
+      answer:0, exp:"EPS＝純利益 ÷ 発行済株式数。ちなみに 株価 ÷ EPS は PER になります。" },
+    { q:"「ほぼ毎年EPSが増加し、減少は1回だけ・しかも軽微」— 評価は？",
+      choices:["A（きれいな右肩上がり）","B（減益後に回復）","C（乱高下）"],
+      answer:0, exp:"ほぼ毎年増加＋軽微な減少1回だけ＝最上位の A。長期でいちばん理想的な形です。" },
+    { q:"「途中で大きく減益したが、その後回復して過去最高EPSを更新」— 評価は？",
+      choices:["A（きれいな右肩上がり）","B（減益後に回復し最高益更新）","C（乱高下）"],
+      answer:1, exp:"落ち込みはあったが回復し最高益を更新＝B。長期では立派な右肩上がりです。" },
+    { q:"「赤字の年があり、EPSが乱高下している」— 評価は？",
+      choices:["A（きれいな右肩上がり）","B（減益後に回復）","C（乱高下・赤字）"],
+      answer:2, exp:"赤字あり＋乱高下＝C。景気に左右されやすく、長期の右肩上がりとは言えません。" }
+  ];
+
+  const XP_CORRECT = 20, XP_WRONG = 5, XP_LESSON = 20, XP_PER_LV = 40;
+
+  // ====== 状態 ======
+  let state, lessonIdx, qIdx, answered;
+  function fresh(){
+    state = { xp:0, level:1, correct:0, badges:{step:false,master:false,perfect:false} };
+    lessonIdx = 0; qIdx = 0; answered = false;
+  }
+  fresh();
+
+  const $ = id => document.getElementById(id);
+  const KEYS = ["A","B","C","D"];
+
+  // ====== 画面遷移 ======
+  function go(name){
+    ["title","lesson","quiz","clear"].forEach(s => $("s-"+s).classList.add("hidden"));
+    $("s-"+name).classList.remove("hidden");
+    if(name==="lesson") renderLesson();
+    if(name==="quiz")   renderQuestion();
+    if(name==="clear")  renderClear();
+    window.scrollTo(0,0);
+  }
+
+  // ====== XP / レベル ======
+  function addXp(amount){
+    state.xp += amount;
+    const newLevel = Math.floor(state.xp / XP_PER_LV) + 1;
+    if(newLevel > state.level){
+      state.level = newLevel;
+      updateHud();            // 先にレベル表示を更新してから演出
+      showLvUp(newLevel);
+    } else {
+      updateHud();
+    }
+  }
+  function updateHud(){
+    const into = state.xp % XP_PER_LV;
+    $("hudLv").textContent = state.level;
+    $("xpNow").textContent = state.xp;
+    $("xpNext").textContent = state.level * XP_PER_LV;
+    $("xpBar").style.width = (into / XP_PER_LV * 100) + "%";
+  }
+  function earnBadge(key){
+    if(state.badges[key]) return;
+    state.badges[key] = true;
+    const el = $("bd-"+key);
+    el.classList.add("on","pop");
+    setTimeout(()=>el.classList.remove("pop"), 500);
+  }
+
+  let lvPending = false;
+  function showLvUp(lv){
+    lvPending = true;
+    $("lvBig").textContent = lv;
+    $("lvText").textContent = lv;
+    $("lvOverlay").classList.remove("hidden");
+  }
+  function closeLvUp(){ $("lvOverlay").classList.add("hidden"); lvPending = false; }
+
+  // ====== レッスン ======
+  function renderLesson(){
+    const l = LESSON[lessonIdx];
+    $("lsnTitle").textContent = l.title;
+    $("lsnCard").innerHTML = l.html;
+    $("lsnDots").innerHTML = LESSON.map((_,i)=>`<span class="dot ${i===lessonIdx?'on':''}"></span>`).join("");
+    $("lsnPrev").style.visibility = lessonIdx===0 ? "hidden" : "visible";
+    $("lsnNext").textContent = lessonIdx===LESSON.length-1 ? "クイズに挑戦 ▶" : "次へ ▶";
+  }
+  function lessonNav(dir){
+    if(dir<0){ if(lessonIdx>0){ lessonIdx--; renderLesson(); } return; }
+    if(lessonIdx < LESSON.length-1){ lessonIdx++; renderLesson(); }
+    else {                              // レッスン読破
+      earnBadge("step");
+      addXp(XP_LESSON);
+      go("quiz");
+    }
+  }
+
+  // ====== クイズ ======
+  function renderQuestion(){
+    answered = false;
+    const item = QUIZ[qIdx];
+    $("qNum").textContent = qIdx+1;
+    $("qCorrect").textContent = state.correct;
+    $("qText").textContent = item.q;
+    $("qFeed").classList.add("hidden");
+    $("qNext").classList.add("hidden");
+    $("qChoices").innerHTML = item.choices.map((c,i)=>
+      `<button class="choice" onclick="answer(${i})">
+         <span class="key">${KEYS[i]}</span><span>${c}</span>
+       </button>`).join("");
+  }
+  function answer(i){
+    if(answered) return;
+    answered = true;
+    const item = QUIZ[qIdx];
+    const btns = [...$("qChoices").children];
+    const correct = i === item.answer;
+
+    btns.forEach((b,idx)=>{
+      b.setAttribute("disabled","");
+      if(idx===item.answer) b.classList.add("correct");
+      else if(idx===i) b.classList.add("wrong");
+      else b.classList.add("dim");
+    });
+
+    const fb = $("qFeed");
+    if(correct){
+      state.correct++;
+      $("qCorrect").textContent = state.correct;
+      fb.className = "feedback good";
+      fb.innerHTML = `<span class="ic">✓</span><div><b>正解！</b> <b class="gain">+${XP_CORRECT} EXP</b><br>${item.exp}</div>`;
+      addXp(XP_CORRECT);
+    } else {
+      fb.className = "feedback bad";
+      fb.innerHTML = `<span class="ic">✕</span><div><b>おしい！</b> 正解は <b>${KEYS[item.answer]}</b>。 <b class="gain">+${XP_WRONG} EXP</b><br>${item.exp}</div>`;
+      addXp(XP_WRONG);
+    }
+    fb.classList.remove("hidden");
+    $("qNext").textContent = qIdx===QUIZ.length-1 ? "結果を見る ▶" : "次の問題 ▶";
+    $("qNext").classList.remove("hidden");
+  }
+  function nextQuestion(){
+    if(lvPending) return;             // レベルアップ演出中は待つ
+    if(qIdx < QUIZ.length-1){ qIdx++; renderQuestion(); window.scrollTo(0,0); }
+    else {
+      earnBadge("master");
+      if(state.correct === QUIZ.length) earnBadge("perfect");
+      go("clear");
+    }
+  }
+
+  // ====== クリア ======
+  function renderClear(){
+    const sc = state.correct;
+    $("rScore").textContent = sc;
+    $("rLv").textContent = state.level;
+    $("rXp").textContent = state.xp;
+    const filled = sc>=5?3 : sc>=4?2 : sc>=2?1 : 0;
+    $("rStars").innerHTML = "★★★".slice(0,filled).padEnd(3,"☆")
+      .replace(/★/g,'<span style="color:var(--gold)">★</span>')
+      .replace(/☆/g,'<span style="color:var(--line)">☆</span>');
+    $("medal").textContent = sc>=5?"👑" : sc>=3?"🏆" : "📈";
+    $("rMsg").textContent = sc>=5 ? "パーフェクト！EPSの見方は完全にマスターだ。"
+                          : sc>=3 ? "good！右肩上がりの型が身についてきた。"
+                          : "もう一度図解を読めば、次はもっと伸びる。";
+    const defs = { step:["📖","はじめの一歩"], master:["🏆","EPSマスター"], perfect:["🎯","パーフェクト"] };
+    const got = Object.keys(defs).filter(k=>state.badges[k]);
+    $("rBadges").innerHTML = got.length
+      ? got.map(k=>`<div class="e"><span class="em">${defs[k][0]}</span>${defs[k][1]}</div>`).join("")
+      : `<span class="muted" style="font-size:13px">今回はなし</span>`;
+  }
+
+  function restart(){ fresh(); updateHud();
+    ["bd-step","bd-master","bd-perfect"].forEach(id=>$(id).classList.remove("on"));
+    go("title");
+  }
+
+  updateHud();
+</script>
