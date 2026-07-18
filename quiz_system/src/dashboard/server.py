@@ -52,6 +52,9 @@ class Handler(BaseHTTPRequestHandler):
             if u.path in ("/game", "/game.html"):
                 html = (STATIC / "game.html").read_text(encoding="utf-8")
                 return self._send(html, ctype="text/html")
+            if u.path in ("/lesson1", "/lesson1.html", "/play"):
+                html = (STATIC / "lesson1.html").read_text(encoding="utf-8")
+                return self._send(html, ctype="text/html")
             if u.path == "/api/game":
                 from ..content.beginner import build_course
                 return self._send(build_course())
