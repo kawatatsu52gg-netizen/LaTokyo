@@ -104,8 +104,24 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def serve(port: int = 8765):
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print(f"医学コンテンツ制作OS Dashboard: http://127.0.0.1:{port}/  (Ctrl+Cで停止)")
+    # ポートが使用中なら +10 まで自動リトライ（再起動時の Address already in use を回避）
+    httpd = None
+    chosen = port
+    for p in range(port, port + 11):
+        try:
+            httpd = ThreadingHTTPServer(("127.0.0.1", p), Handler)
+            chosen = p
+            break
+        except OSError:
+            continue
+    if httpd is None:
+        raise SystemExit(
+            f"起動失敗: ポート {port}〜{port+10} がすべて使用中です。\n"
+            f"  既存のサーバを停止するか、PORT=別番号 で起動してください。")
+    if chosen != port:
+        print(f"※ ポート {port} は使用中のため {chosen} で起動します。")
+    print(f"医学コンテンツ制作OS Dashboard: http://127.0.0.1:{chosen}/  (Ctrl+Cで停止)")
+    print(f"  Lesson1（教材）: http://127.0.0.1:{chosen}/lesson1")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
