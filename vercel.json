@@ -1,0 +1,10 @@
+{
+  "crons": [
+    { "path": "/api/cron/plan", "schedule": "0 18 * * *" },
+    { "path": "/api/cron/generate", "schedule": "30 18 * * *" },
+    { "path": "/api/cron/publish", "schedule": "*/10 * * * *" },
+    { "path": "/api/cron/collect", "schedule": "5 * * * *" },
+    { "path": "/api/cron/evaluate", "schedule": "0 20 * * *" },
+    { "path": "/api/cron/weekly", "schedule": "0 19 * * 0" }
+  ]
+}
